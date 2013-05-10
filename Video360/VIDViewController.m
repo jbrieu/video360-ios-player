@@ -53,6 +53,7 @@ GLfloat gCubeVertexData[216] =
 @interface VIDViewController () {
     
     float _rotation;
+    float _cameraAngle;
     
     GLuint _vertexArray;
     GLuint _vertexBuffer;
@@ -80,6 +81,8 @@ GLfloat gCubeVertexData[216] =
     GLKView *view = (GLKView *)self.view;
     view.context = self.context;
     view.drawableDepthFormat = GLKViewDrawableDepthFormat24;
+        
+    _cameraAngle = 65.0f;
     
     [self setupGL];
 }
@@ -151,7 +154,7 @@ GLfloat gCubeVertexData[216] =
 - (void)update
 {
     float aspect = fabsf(self.view.bounds.size.width / self.view.bounds.size.height);
-    GLKMatrix4 projectionMatrix = GLKMatrix4MakePerspective(GLKMathDegreesToRadians(65.0f), aspect, 0.1f, 100.0f);
+    GLKMatrix4 projectionMatrix = GLKMatrix4MakePerspective(GLKMathDegreesToRadians(_cameraAngle), aspect, 0.1f, 100.0f);
     
     self.effect.transform.projectionMatrix = projectionMatrix;
     
@@ -165,6 +168,7 @@ GLfloat gCubeVertexData[216] =
     self.effect.transform.modelviewMatrix = modelViewMatrix;
     
     _rotation += self.timeSinceLastUpdate * 0.5f;
+    
 }
 
 - (void)glkView:(GLKView *)view drawInRect:(CGRect)rect
