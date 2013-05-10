@@ -42,12 +42,12 @@ GLfloat gCubeVertexData[216] =
 {
     // Data layout for each line below is:
     // positionX, positionY, positionZ,     normalX, normalY, normalZ,
-    0.5f, -0.5f, -0.5f,        1.0f, 0.0f, 0.0f,
-    0.5f, 0.5f, -0.5f,         1.0f, 0.0f, 0.0f,
-    0.5f, -0.5f, 0.5f,         1.0f, 0.0f, 0.0f,
-    0.5f, -0.5f, 0.5f,         1.0f, 0.0f, 0.0f,
-    0.5f, 0.5f, -0.5f,          1.0f, 0.0f, 0.0f,
-    0.5f, 0.5f, 0.5f,         1.0f, 0.0f, 0.0f
+    0.0f, -0.5f, -0.5f,        1.0f, 0.0f, 0.0f,
+    0.0f, 0.5f, -0.5f,         1.0f, 0.0f, 0.0f,
+    0.0f, -0.5f, 0.5f,         1.0f, 0.0f, 0.0f,
+    0.0f, -0.5f, 0.5f,         1.0f, 0.0f, 0.0f,
+    0.0f, 0.5f, -0.5f,         1.0f, 0.0f, 0.0f,
+    0.0f, 0.5f, 0.5f,          1.0f, 0.0f, 0.0f
 };
 
 @interface VIDViewController () {
@@ -81,8 +81,8 @@ GLfloat gCubeVertexData[216] =
     GLKView *view = (GLKView *)self.view;
     view.context = self.context;
     view.drawableDepthFormat = GLKViewDrawableDepthFormat24;
-        
-    _cameraAngle = 65.0f;
+    
+    _cameraAngle = 45.0f;
     
     [self setupGL];
 }
@@ -155,19 +155,19 @@ GLfloat gCubeVertexData[216] =
 {
     float aspect = fabsf(self.view.bounds.size.width / self.view.bounds.size.height);
     GLKMatrix4 projectionMatrix = GLKMatrix4MakePerspective(GLKMathDegreesToRadians(_cameraAngle), aspect, 0.1f, 100.0f);
-    
     self.effect.transform.projectionMatrix = projectionMatrix;
     
     GLKMatrix4 baseModelViewMatrix = GLKMatrix4MakeTranslation(0.0f, 0.0f, -4.0f);
+
     
     // Compute the model view matrix for the object rendered with GLKit
     GLKMatrix4 modelViewMatrix = GLKMatrix4MakeTranslation(0.0f, 0.0f, 0.0f);
-    modelViewMatrix = GLKMatrix4Rotate(modelViewMatrix, _rotation, 0.0f, 0.0f, 1.0f);
+    modelViewMatrix = GLKMatrix4Rotate(modelViewMatrix, _rotation, 0.0f, 1.0f, 0.0f);
     modelViewMatrix = GLKMatrix4Multiply(baseModelViewMatrix, modelViewMatrix);
     
     self.effect.transform.modelviewMatrix = modelViewMatrix;
     
-    _rotation += self.timeSinceLastUpdate * 0.5f;
+    _rotation += self.timeSinceLastUpdate * 0.2f;
     
 }
 
