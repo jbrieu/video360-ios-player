@@ -94,9 +94,12 @@
     GLKMatrix4 modelview = GLKMatrix4MakeTranslation(0, 0, -3.0f);
     self.effect.transform.modelviewMatrix = modelview;
     
-    GLfloat ratio = self.view.bounds.size.width/self.view.bounds.size.height;
-    GLKMatrix4 projection = GLKMatrix4MakePerspective(45.0f, ratio, 0.1f, 20.0f);
-    self.effect.transform.projectionMatrix = projection;
+//    GLfloat ratio = self.view.bounds.size.width/self.view.bounds.size.height;
+//    GLKMatrix4 projection = GLKMatrix4MakePerspective(45.0f, ratio, 0.1f, 20.0f);
+//    self.effect.transform.projectionMatrix = projection;
+    
+    GLKMatrix4 ortho = GLKMatrix4MakeOrtho(0, 1.0f, 0, 1.0f, 0.1f, 20.0f);
+    self.effect.transform.projectionMatrix = ortho;
     
 }
 
