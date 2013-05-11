@@ -8,65 +8,20 @@
 
 #import "VIDViewController.h"
 
-#define BUFFER_OFFSET(i) ((char *)NULL + (i))
-
-#define CALC_UVS(x, y, z, u, v) \
-vx = x; \
-vy = y; \
-vz = z; \
-mag = (float)sqrt(SQR(vx)+SQR(vy)+SQR(vz)); \
-vx /= mag;  \
-vy /= mag;  \
-vz /= mag;  \
-u = (float)(atan2(vx, vz)/(M_PI * 2)) + 0.5f;    \
-v = (float)(asinf(vy) / M_PI) + 0.5f;
-
-// Uniform index.
-enum
-{
-    UNIFORM_MODELVIEWPROJECTION_MATRIX,
-    UNIFORM_NORMAL_MATRIX,
-    NUM_UNIFORMS
-};
-GLint uniforms[NUM_UNIFORMS];
-
-// Attribute index.
-enum
-{
-    ATTRIB_VERTEX,
-    ATTRIB_NORMAL,
-    NUM_ATTRIBUTES
-};
-
-GLfloat gCubeVertexData[216] =
-{
-    // Data layout for each line below is:
-    // positionX, positionY, positionZ,     normalX, normalY, normalZ,
-    0.0f, -0.5f, -0.5f,        1.0f, 0.0f, 0.0f,
-    0.0f, 0.5f, -0.5f,         1.0f, 0.0f, 0.0f,
-    0.0f, -0.5f, 0.5f,         1.0f, 0.0f, 0.0f,
-    0.0f, -0.5f, 0.5f,         1.0f, 0.0f, 0.0f,
-    0.0f, 0.5f, -0.5f,         1.0f, 0.0f, 0.0f,
-    0.0f, 0.5f, 0.5f,          1.0f, 0.0f, 0.0f
-};
 
 @interface VIDViewController () {
     
-    float _rotation;
-    float _cameraAngle;
-    
-    GLuint _vertexArray;
-    GLuint _vertexBuffer;
 }
 @property (strong, nonatomic) EAGLContext *context;
 @property (strong, nonatomic) GLKBaseEffect *effect;
 
-- (void)setupGL;
+
 - (void)tearDownGL;
 
 @end
 
 @implementation VIDViewController
+
 
 - (void)viewDidLoad
 {
@@ -80,11 +35,17 @@ GLfloat gCubeVertexData[216] =
     
     GLKView *view = (GLKView *)self.view;
     view.context = self.context;
+    view.delegate = self;
+    view.drawableColorFormat = GLKViewDrawableColorFormatRGBA8888;
+    view.drawableDepthFormat = GLKViewDrawableDepthFormat16;
     view.drawableDepthFormat = GLKViewDrawableDepthFormat24;
+        
+    self.preferredFramesPerSecond = 30;
     
-    _cameraAngle = 45.0f;
+    self.effect = [[GLKBaseEffect alloc] init];
     
-    [self setupGL];
+    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+    
 }
 
 - (void)dealloc
@@ -114,37 +75,13 @@ GLfloat gCubeVertexData[216] =
     // Dispose of any resources that can be recreated.
 }
 
-- (void)setupGL
-{
-    [EAGLContext setCurrentContext:self.context];
-    
-    self.effect = [[GLKBaseEffect alloc] init];
-    self.effect.light0.enabled = GL_TRUE;
-    self.effect.light0.diffuseColor = GLKVector4Make(1.0f, 0.4f, 0.4f, 1.0f);
-    
-    glEnable(GL_DEPTH_TEST);
-    
-    glGenVertexArraysOES(1, &_vertexArray);
-    glBindVertexArrayOES(_vertexArray);
-    
-    glGenBuffers(1, &_vertexBuffer);
-    glBindBuffer(GL_ARRAY_BUFFER, _vertexBuffer);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(gCubeVertexData), gCubeVertexData, GL_STATIC_DRAW);
-    
-    glEnableVertexAttribArray(GLKVertexAttribPosition);
-    glVertexAttribPointer(GLKVertexAttribPosition, 3, GL_FLOAT, GL_FALSE, 24, BUFFER_OFFSET(0));
-    glEnableVertexAttribArray(GLKVertexAttribNormal);
-    glVertexAttribPointer(GLKVertexAttribNormal, 3, GL_FLOAT, GL_FALSE, 24, BUFFER_OFFSET(12));
-    
-    glBindVertexArrayOES(0);
-}
 
 - (void)tearDownGL
 {
     [EAGLContext setCurrentContext:self.context];
     
-    glDeleteBuffers(1, &_vertexBuffer);
-    glDeleteVertexArraysOES(1, &_vertexArray);
+    glDisableVertexAttribArray(GLKVertexAttribPosition);
+    glDisableVertexAttribArray(GLKVertexAttribColor);
     
     self.effect = nil;
 }
@@ -153,35 +90,46 @@ GLfloat gCubeVertexData[216] =
 
 - (void)update
 {
-    float aspect = fabsf(self.view.bounds.size.width / self.view.bounds.size.height);
-    GLKMatrix4 projectionMatrix = GLKMatrix4MakePerspective(GLKMathDegreesToRadians(_cameraAngle), aspect, 0.1f, 100.0f);
-    self.effect.transform.projectionMatrix = projectionMatrix;
     
-    GLKMatrix4 baseModelViewMatrix = GLKMatrix4MakeTranslation(0.0f, 0.0f, -4.0f);
-
+    GLKMatrix4 modelview = GLKMatrix4MakeTranslation(0, 0, -3.0f);
+    self.effect.transform.modelviewMatrix = modelview;
     
-    // Compute the model view matrix for the object rendered with GLKit
-    GLKMatrix4 modelViewMatrix = GLKMatrix4MakeTranslation(0.0f, 0.0f, 0.0f);
-    modelViewMatrix = GLKMatrix4Rotate(modelViewMatrix, _rotation, 0.0f, 1.0f, 0.0f);
-    modelViewMatrix = GLKMatrix4Multiply(baseModelViewMatrix, modelViewMatrix);
-    
-    self.effect.transform.modelviewMatrix = modelViewMatrix;
-    
-    _rotation += self.timeSinceLastUpdate * 0.2f;
+    GLfloat ratio = self.view.bounds.size.width/self.view.bounds.size.height;
+    GLKMatrix4 projection = GLKMatrix4MakePerspective(45.0f, ratio, 0.1f, 20.0f);
+    self.effect.transform.projectionMatrix = projection;
     
 }
 
 - (void)glkView:(GLKView *)view drawInRect:(CGRect)rect
 {
-    glClearColor(0.65f, 0.65f, 0.65f, 1.0f);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    
-    glBindVertexArrayOES(_vertexArray);
-    
-    // Render the object with GLKit
     [self.effect prepareToDraw];
     
-    glDrawArrays(GL_TRIANGLES, 0, 6);
+    static const GLfloat squareVertices[] = {
+        -1.0f, -1.0f, 1,
+        1.0f, -1.0f, 1,
+        -1.0f,  1.0f, 1,
+        1.0f,  1.0f, 1
+    };
+    
+    static const GLubyte squareColors[] = {
+        255, 255,   0, 255,
+        0,   255, 255, 255,
+        0,     0,   0,   0,
+        255,   0, 255, 255,
+    };
+    
+    glClear(GL_COLOR_BUFFER_BIT);
+    
+    glEnableVertexAttribArray(GLKVertexAttribPosition);
+    glEnableVertexAttribArray(GLKVertexAttribColor);
+    
+    glVertexAttribPointer(GLKVertexAttribPosition, 3, GL_FLOAT, GL_FALSE, 0, squareVertices);
+    glVertexAttribPointer(GLKVertexAttribColor, 4, GL_UNSIGNED_BYTE, GL_TRUE, 0, squareColors);
+    
+    glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+    
+    glDisableVertexAttribArray(GLKVertexAttribPosition);
+    glDisableVertexAttribArray(GLKVertexAttribColor);
     
 }
 
