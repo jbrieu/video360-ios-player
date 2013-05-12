@@ -26,6 +26,11 @@
 		012C66D6173A9F710098A148 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 012C66A6173A9F700098A148 /* Foundation.framework */; };
 		012C66DE173A9F710098A148 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 012C66DC173A9F710098A148 /* InfoPlist.strings */; };
 		012C66E1173A9F710098A148 /* Video360Tests.m in Sources */ = {isa = PBXBuildFile; fileRef = 012C66E0173A9F710098A148 /* Video360Tests.m */; };
+		012C66EB17404C120098A148 /* AVFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 012C66EA17404C120098A148 /* AVFoundation.framework */; };
+		012C66EE17404F590098A148 /* demo.mp4 in Resources */ = {isa = PBXBuildFile; fileRef = 012C66ED17404F590098A148 /* demo.mp4 */; };
+		012C66F1174050B10098A148 /* MobileCoreServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 012C66EF174050810098A148 /* MobileCoreServices.framework */; };
+		012C66F3174050B70098A148 /* CoreVideo.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 012C66F2174050B70098A148 /* CoreVideo.framework */; };
+		012C66F5174050BC0098A148 /* CoreMedia.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 012C66F4174050BC0098A148 /* CoreMedia.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -64,6 +69,11 @@
 		012C66DD173A9F710098A148 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		012C66DF173A9F710098A148 /* Video360Tests.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Video360Tests.h; sourceTree = "<group>"; };
 		012C66E0173A9F710098A148 /* Video360Tests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = Video360Tests.m; sourceTree = "<group>"; };
+		012C66EA17404C120098A148 /* AVFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVFoundation.framework; path = System/Library/Frameworks/AVFoundation.framework; sourceTree = SDKROOT; };
+		012C66ED17404F590098A148 /* demo.mp4 */ = {isa = PBXFileReference; lastKnownFileType = file; path = demo.mp4; sourceTree = "<group>"; };
+		012C66EF174050810098A148 /* MobileCoreServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MobileCoreServices.framework; path = System/Library/Frameworks/MobileCoreServices.framework; sourceTree = SDKROOT; };
+		012C66F2174050B70098A148 /* CoreVideo.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreVideo.framework; path = System/Library/Frameworks/CoreVideo.framework; sourceTree = SDKROOT; };
+		012C66F4174050BC0098A148 /* CoreMedia.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreMedia.framework; path = System/Library/Frameworks/CoreMedia.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -71,6 +81,10 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				012C66F5174050BC0098A148 /* CoreMedia.framework in Frameworks */,
+				012C66F3174050B70098A148 /* CoreVideo.framework in Frameworks */,
+				012C66F1174050B10098A148 /* MobileCoreServices.framework in Frameworks */,
+				012C66EB17404C120098A148 /* AVFoundation.framework in Frameworks */,
 				012C66A5173A9F700098A148 /* UIKit.framework in Frameworks */,
 				012C66A7173A9F700098A148 /* Foundation.framework in Frameworks */,
 				012C66A9173A9F700098A148 /* CoreGraphics.framework in Frameworks */,
@@ -95,6 +109,10 @@
 		012C6698173A9F700098A148 = {
 			isa = PBXGroup;
 			children = (
+				012C66F4174050BC0098A148 /* CoreMedia.framework */,
+				012C66F2174050B70098A148 /* CoreVideo.framework */,
+				012C66EF174050810098A148 /* MobileCoreServices.framework */,
+				012C66EA17404C120098A148 /* AVFoundation.framework */,
 				012C66AE173A9F700098A148 /* Video360 */,
 				012C66D9173A9F710098A148 /* Video360Tests */,
 				012C66A3173A9F700098A148 /* Frameworks */,
@@ -133,6 +151,7 @@
 				012C66C3173A9F700098A148 /* MainStoryboard_iPad.storyboard */,
 				012C66CA173A9F700098A148 /* VIDViewController.h */,
 				012C66CB173A9F700098A148 /* VIDViewController.m */,
+				012C66EC17404F590098A148 /* Resources */,
 				012C66AF173A9F700098A148 /* Supporting Files */,
 			);
 			path = Video360;
@@ -169,6 +188,14 @@
 				012C66DC173A9F710098A148 /* InfoPlist.strings */,
 			);
 			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+		012C66EC17404F590098A148 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				012C66ED17404F590098A148 /* demo.mp4 */,
+			);
+			path = Resources;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -249,6 +276,7 @@
 				012C66BF173A9F700098A148 /* Default-568h@2x.png in Resources */,
 				012C66C2173A9F700098A148 /* MainStoryboard_iPhone.storyboard in Resources */,
 				012C66C5173A9F700098A148 /* MainStoryboard_iPad.storyboard in Resources */,
+				012C66EE17404F590098A148 /* demo.mp4 in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -368,7 +396,7 @@
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNINITIALIZED_AUTOS = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 6.1;
+				IPHONEOS_DEPLOYMENT_TARGET = 5.0;
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -393,7 +421,7 @@
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNINITIALIZED_AUTOS = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 6.1;
+				IPHONEOS_DEPLOYMENT_TARGET = 5.0;
 				OTHER_CFLAGS = "-DNS_BLOCK_ASSERTIONS=1";
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
