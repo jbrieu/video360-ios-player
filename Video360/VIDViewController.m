@@ -16,12 +16,11 @@ static void *AVPlayerItemStatusContext = &AVPlayerItemStatusContext;
 @interface VIDViewController ()
 {
 	AVPlayer *_player;
-    dispatch_queue_t _myVideoOutputQueue;
     id _notificationToken;
 }
 @property (strong, nonatomic) EAGLContext *context;
 @property (strong, nonatomic) GLKBaseEffect *effect;
-@property AVPlayerItemVideoOutput *videoOutput;
+@property (strong, nonatomic) AVPlayerItemVideoOutput *videoOutput;
 
 
 - (void)tearDownGL;
@@ -44,10 +43,7 @@ static void *AVPlayerItemStatusContext = &AVPlayerItemStatusContext;
     ///////////PLAYER/////////////
     _player = [[AVPlayer alloc] init];
     
-	NSDictionary *pixBuffAttributes = @{(id)kCVPixelBufferPixelFormatTypeKey: @(kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange)};
-	self.videoOutput = [[AVPlayerItemVideoOutput alloc] initWithPixelBufferAttributes:pixBuffAttributes];
-	_myVideoOutputQueue = dispatch_queue_create("myVideoOutputQueue", DISPATCH_QUEUE_SERIAL);
-	[[self videoOutput] setDelegate:self queue:_myVideoOutputQueue];
+    
     
     /////////GL VIEW/////////////
     GLKView *view = (GLKView *)self.view;
@@ -56,7 +52,7 @@ static void *AVPlayerItemStatusContext = &AVPlayerItemStatusContext;
     view.drawableColorFormat = GLKViewDrawableColorFormatRGBA8888;
     view.drawableDepthFormat = GLKViewDrawableDepthFormat16;
     view.drawableDepthFormat = GLKViewDrawableDepthFormat24;
-        
+    
     self.preferredFramesPerSecond = 30;
     
     self.effect = [[GLKBaseEffect alloc] init];
@@ -70,9 +66,7 @@ static void *AVPlayerItemStatusContext = &AVPlayerItemStatusContext;
 	[self addObserver:self forKeyPath:@"player.currentItem.status" options:NSKeyValueObservingOptionNew context:AVPlayerItemStatusContext];
     
     [_player pause];
-	
-    
-	//[self setupPlaybackForURL:info[UIImagePickerControllerReferenceURL]];
+	    
     NSURL *url = [[NSBundle mainBundle]
                   URLForResource: @"demo" withExtension:@"mp4"];
     
@@ -139,7 +133,7 @@ static void *AVPlayerItemStatusContext = &AVPlayerItemStatusContext;
 	 */
 	
 	// Remove video output from old item, if any.
-	[[_player currentItem] removeOutput:self.videoOutput];
+//	[[_player currentItem] removeOutput:self.videoOutput];
     
 	AVPlayerItem *item = [AVPlayerItem playerItemWithURL:URL];
 	AVAsset *asset = [item asset];
@@ -149,78 +143,77 @@ static void *AVPlayerItemStatusContext = &AVPlayerItemStatusContext;
 		if ([asset statusOfValueForKey:@"tracks" error:nil] == AVKeyValueStatusLoaded) {
 			NSArray *tracks = [asset tracksWithMediaType:AVMediaTypeVideo];
 			if ([tracks count] > 0) {
-				// Choose the first video track.
-				AVAssetTrack *videoTrack = [tracks objectAtIndex:0];
-				[videoTrack loadValuesAsynchronouslyForKeys:@[@"preferredTransform"] completionHandler:^{
-					
-					if ([videoTrack statusOfValueForKey:@"preferredTransform" error:nil] == AVKeyValueStatusLoaded) {
-//						CGAffineTransform preferredTransform = [videoTrack preferredTransform];
-//                        /*
-//                         The orientation of the camera while recording affects the orientation of the images received from an AVPlayerItemVideoOutput. Here we compute a rotation that is used to correctly orientate the video.
-//                         */
-//						self.playerView.preferredRotation = -1 * atan2(preferredTransform.b, preferredTransform.a);
-						[self addDidPlayToEndTimeNotificationForPlayerItem:item];
-						
-						dispatch_async(dispatch_get_main_queue(), ^{
-							//[item addOutput:self.videoOutput];
-							[_player replaceCurrentItemWithPlayerItem:item];
-							[self.videoOutput requestNotificationOfMediaDataChangeWithAdvanceInterval:ONE_FRAME_DURATION];
-							[_player play];
-						});
-						
-					}
-					
-				}];
-			}
-		}
-		
-	}];
-	
+                NSError* error = nil;
+                AVKeyValueStatus status = [asset statusOfValueForKey:@"tracks" error:&error];
+                if (status == AVKeyValueStatusLoaded)
+                {
+                    NSDictionary* settings = @{ (id)kCVPixelBufferPixelFormatTypeKey : [NSNumber numberWithInt:kCVPixelFormatType_32BGRA] };
+                    self.videoOutput = [[AVPlayerItemVideoOutput alloc] initWithPixelBufferAttributes:settings];
+                    AVPlayerItem* playerItem = [AVPlayerItem playerItemWithAsset:asset];
+                    [playerItem addOutput:self.videoOutput];
+                    _player = [AVPlayer playerWithPlayerItem:playerItem];
+                    
+                    
+                    dispatch_async(dispatch_get_main_queue(), ^{
+                        [self.videoOutput requestNotificationOfMediaDataChangeWithAdvanceInterval:ONE_FRAME_DURATION];
+                        [_player play];
+                    });
+                    
+                }
+                else
+                {
+                    NSLog(@"%@ Failed to load the tracks.", self);
+                }
+            }
+        }
+        
+    }];
+    
 }
 
 - (void)stopLoadingAnimationAndHandleError:(NSError *)error
 {
-	if (error) {
+    if (error) {
         NSString *cancelButtonTitle = NSLocalizedString(@"OK", @"Cancel button title for animation load error");
-		UIAlertView *alertView = [[UIAlertView alloc] initWithTitle:[error localizedDescription] message:[error localizedFailureReason] delegate:nil cancelButtonTitle:cancelButtonTitle otherButtonTitles:nil];
-		[alertView show];
-	}
+        UIAlertView *alertView = [[UIAlertView alloc] initWithTitle:[error localizedDescription] message:[error localizedFailureReason] delegate:nil cancelButtonTitle:cancelButtonTitle otherButtonTitles:nil];
+        [alertView show];
+    }
 }
 
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context
 {
-	if (context == AVPlayerItemStatusContext) {
-		AVPlayerStatus status = [change[NSKeyValueChangeNewKey] integerValue];
-		switch (status) {
-			case AVPlayerItemStatusUnknown:
-				break;
-			case AVPlayerItemStatusReadyToPlay:
-//				self.playerView.presentationRect = [[_player currentItem] presentationSize];
-				break;
-			case AVPlayerItemStatusFailed:
-				[self stopLoadingAnimationAndHandleError:[[_player currentItem] error]];
-				break;
-		}
-	}
-	else {
-		[super observeValueForKeyPath:keyPath ofObject:object change:change context:context];
-	}
+    if (context == AVPlayerItemStatusContext) {
+        AVPlayerStatus status = [change[NSKeyValueChangeNewKey] integerValue];
+        switch (status) {
+            case AVPlayerItemStatusUnknown:
+                break;
+            case AVPlayerItemStatusReadyToPlay:
+                //				self.playerView.presentationRect = [[_player currentItem] presentationSize];
+                break;
+            case AVPlayerItemStatusFailed:
+                [self stopLoadingAnimationAndHandleError:[[_player currentItem] error]];
+                break;
+        }
+    }
+    else {
+        [super observeValueForKeyPath:keyPath ofObject:object change:change context:context];
+    }
 }
 
 
 - (void)addDidPlayToEndTimeNotificationForPlayerItem:(AVPlayerItem *)item
 {
-	if (_notificationToken)
-		_notificationToken = nil;
-	
-	/*
+    if (_notificationToken)
+        _notificationToken = nil;
+    
+    /*
      Setting actionAtItemEnd to None prevents the movie from getting paused at item end. A very simplistic, and not gapless, looped playback.
      */
-	_player.actionAtItemEnd = AVPlayerActionAtItemEndNone;
-	_notificationToken = [[NSNotificationCenter defaultCenter] addObserverForName:AVPlayerItemDidPlayToEndTimeNotification object:item queue:[NSOperationQueue mainQueue] usingBlock:^(NSNotification *note) {
-		// Simple item playback rewind.
-		[[_player currentItem] seekToTime:kCMTimeZero];
-	}];
+    _player.actionAtItemEnd = AVPlayerActionAtItemEndNone;
+    _notificationToken = [[NSNotificationCenter defaultCenter] addObserverForName:AVPlayerItemDidPlayToEndTimeNotification object:item queue:[NSOperationQueue mainQueue] usingBlock:^(NSNotification *note) {
+        // Simple item playback rewind.
+        [[_player currentItem] seekToTime:kCMTimeZero];
+    }];
 }
 
 
@@ -232,9 +225,9 @@ static void *AVPlayerItemStatusContext = &AVPlayerItemStatusContext;
     GLKMatrix4 modelview = GLKMatrix4MakeTranslation(0, 0, -3.0f);
     self.effect.transform.modelviewMatrix = modelview;
     
-//    GLfloat ratio = self.view.bounds.size.width/self.view.bounds.size.height;
-//    GLKMatrix4 projection = GLKMatrix4MakePerspective(45.0f, ratio, 0.1f, 20.0f);
-//    self.effect.transform.projectionMatrix = projection;
+    //    GLfloat ratio = self.view.bounds.size.width/self.view.bounds.size.height;
+    //    GLKMatrix4 projection = GLKMatrix4MakePerspective(45.0f, ratio, 0.1f, 20.0f);
+    //    self.effect.transform.projectionMatrix = projection;
     
     GLKMatrix4 ortho = GLKMatrix4MakeOrtho(0, 1.0f, 0, 1.0f, 0.1f, 20.0f);
     self.effect.transform.projectionMatrix = ortho;
@@ -257,8 +250,8 @@ static void *AVPlayerItemStatusContext = &AVPlayerItemStatusContext;
     //
     //		[[self view] displayPixelBuffer:pixelBuffer];
     //	}
-    //    
-
+    //
+    
     
     
 }
@@ -305,8 +298,8 @@ static void *AVPlayerItemStatusContext = &AVPlayerItemStatusContext;
 
 - (void)outputMediaDataWillChange:(AVPlayerItemOutput *)sender
 {
-	// Restart display link.
-//	[[self displayLink] setPaused:NO];
+    // Restart display link.
+    //	[[self displayLink] setPaused:NO];
 }
 
 
