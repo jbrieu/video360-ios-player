@@ -32,8 +32,6 @@
 		012C66F3174050B70098A148 /* CoreVideo.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 012C66F2174050B70098A148 /* CoreVideo.framework */; };
 		012C66F5174050BC0098A148 /* CoreMedia.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 012C66F4174050BC0098A148 /* CoreMedia.framework */; };
 		012C672D174A05260098A148 /* tile_floor.png in Resources */ = {isa = PBXBuildFile; fileRef = 012C672C174A05260098A148 /* tile_floor.png */; };
-		012C6767174A08CA0098A148 /* Shader.fsh in Sources */ = {isa = PBXBuildFile; fileRef = 012C6765174A08CA0098A148 /* Shader.fsh */; };
-		012C6768174A08CA0098A148 /* Shader.vsh in Sources */ = {isa = PBXBuildFile; fileRef = 012C6766174A08CA0098A148 /* Shader.vsh */; };
 		012C6769174A08DE0098A148 /* Shader.fsh in Resources */ = {isa = PBXBuildFile; fileRef = 012C6765174A08CA0098A148 /* Shader.fsh */; };
 		012C676A174A08DE0098A148 /* Shader.vsh in Resources */ = {isa = PBXBuildFile; fileRef = 012C6766174A08CA0098A148 /* Shader.vsh */; };
 /* End PBXBuildFile section */
@@ -328,8 +326,6 @@
 				012C66B5173A9F700098A148 /* main.m in Sources */,
 				012C66B9173A9F700098A148 /* VIDAppDelegate.m in Sources */,
 				012C66CC173A9F700098A148 /* VIDViewController.m in Sources */,
-				012C6767174A08CA0098A148 /* Shader.fsh in Sources */,
-				012C6768174A08CA0098A148 /* Shader.vsh in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
