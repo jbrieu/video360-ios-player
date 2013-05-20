@@ -32,6 +32,10 @@
 		012C66F3174050B70098A148 /* CoreVideo.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 012C66F2174050B70098A148 /* CoreVideo.framework */; };
 		012C66F5174050BC0098A148 /* CoreMedia.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 012C66F4174050BC0098A148 /* CoreMedia.framework */; };
 		012C672D174A05260098A148 /* tile_floor.png in Resources */ = {isa = PBXBuildFile; fileRef = 012C672C174A05260098A148 /* tile_floor.png */; };
+		012C6767174A08CA0098A148 /* Shader.fsh in Sources */ = {isa = PBXBuildFile; fileRef = 012C6765174A08CA0098A148 /* Shader.fsh */; };
+		012C6768174A08CA0098A148 /* Shader.vsh in Sources */ = {isa = PBXBuildFile; fileRef = 012C6766174A08CA0098A148 /* Shader.vsh */; };
+		012C6769174A08DE0098A148 /* Shader.fsh in Resources */ = {isa = PBXBuildFile; fileRef = 012C6765174A08CA0098A148 /* Shader.fsh */; };
+		012C676A174A08DE0098A148 /* Shader.vsh in Resources */ = {isa = PBXBuildFile; fileRef = 012C6766174A08CA0098A148 /* Shader.vsh */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -76,6 +80,8 @@
 		012C66F2174050B70098A148 /* CoreVideo.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreVideo.framework; path = System/Library/Frameworks/CoreVideo.framework; sourceTree = SDKROOT; };
 		012C66F4174050BC0098A148 /* CoreMedia.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreMedia.framework; path = System/Library/Frameworks/CoreMedia.framework; sourceTree = SDKROOT; };
 		012C672C174A05260098A148 /* tile_floor.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = tile_floor.png; sourceTree = "<group>"; };
+		012C6765174A08CA0098A148 /* Shader.fsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = Shader.fsh; sourceTree = "<group>"; };
+		012C6766174A08CA0098A148 /* Shader.vsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = Shader.vsh; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -195,6 +201,8 @@
 		012C66EC17404F590098A148 /* Resources */ = {
 			isa = PBXGroup;
 			children = (
+				012C6765174A08CA0098A148 /* Shader.fsh */,
+				012C6766174A08CA0098A148 /* Shader.vsh */,
 				012C672C174A05260098A148 /* tile_floor.png */,
 				012C66ED17404F590098A148 /* demo.mp4 */,
 			);
@@ -273,6 +281,8 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				012C6769174A08DE0098A148 /* Shader.fsh in Resources */,
+				012C676A174A08DE0098A148 /* Shader.vsh in Resources */,
 				012C66B3173A9F700098A148 /* InfoPlist.strings in Resources */,
 				012C66BB173A9F700098A148 /* Default.png in Resources */,
 				012C66BD173A9F700098A148 /* Default@2x.png in Resources */,
@@ -318,6 +328,8 @@
 				012C66B5173A9F700098A148 /* main.m in Sources */,
 				012C66B9173A9F700098A148 /* VIDAppDelegate.m in Sources */,
 				012C66CC173A9F700098A148 /* VIDViewController.m in Sources */,
+				012C6767174A08CA0098A148 /* Shader.fsh in Sources */,
+				012C6768174A08CA0098A148 /* Shader.vsh in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
