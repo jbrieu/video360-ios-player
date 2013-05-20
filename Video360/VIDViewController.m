@@ -12,17 +12,16 @@
 
 typedef struct {
     float Position[3];
+    float Normal[3];
     float Color[4];
     float TexCoord[2];
-    float Normal[3];
 } Vertex;
 
 const Vertex Vertices[] = {
-    // Front
-    {{1, -1, 1}, {1, 0, 0, 1}, {1, 0}, {0, 0, 1}},
-    {{1, 1, 1}, {0, 1, 0, 1}, {1, 1}, {0, 0, 1}},
-    {{-1, 1, 1}, {0, 0, 1, 1}, {0, 1}, {0, 0, 1}},
-    {{-1, -1, 1}, {0, 0, 0, 1}, {0, 0}, {0, 0, 1}}
+    {{1, -1, 0}, {0, 0, 1}, {1, 0, 0, 1}, {1, 0}},
+    {{1, 1, 0},  {0, 0, 1},{0, 1, 0, 1},{1, 1} },
+    {{-1, 1, 0},  {0, 0, 1},{0, 0, 1, 1},{0, 1}},
+    {{-1, -1, 0},  {0, 0, 1},{0, 0, 0, 1},{0, 0}}
 };
 
 
@@ -36,6 +35,7 @@ enum
 {
     UNIFORM_MODELVIEWPROJECTION_MATRIX,
     UNIFORM_NORMAL_MATRIX,
+    UNIFORM_TEXTURE,
     NUM_UNIFORMS
 };
 GLint uniforms[NUM_UNIFORMS];
@@ -46,6 +46,7 @@ enum
     ATTRIB_VERTEX,
     ATTRIB_NORMAL,
     ATTRIBUT_COLOR,
+    ATTRIBUT_TEXCOORD,
     NUM_ATTRIBUTES
 };
 
@@ -57,20 +58,23 @@ enum
     
     GLKMatrix4 _modelViewProjectionMatrix;
     GLKMatrix3 _normalMatrix;
-//    float _rotation;
+    //    float _rotation;
     
     GLuint _vertexArray;
     
     GLuint _vertexBuffer;
     GLuint _indexBuffer;
+    GLuint _textureBuffer;
     
     CGPoint _startPoint;
     CGFloat _dx;
     CGFloat _dy;
-
+    
+    GLKTextureInfo *_textureInfo;
+    
 }
 @property (strong, nonatomic) EAGLContext *context;
-@property (strong, nonatomic) GLKBaseEffect *effect;
+//@property (strong, nonatomic) GLKBaseEffect *effect;
 
 - (void)setupGL;
 - (void)tearDownGL;
@@ -97,6 +101,8 @@ enum
     view.context = self.context;
     view.drawableDepthFormat = GLKViewDrawableDepthFormat24;
     view.drawableMultisample = GLKViewDrawableMultisample4X;
+    
+    _startPoint = CGPointMake(0.0f, 0.0f);
     
     [self setupGL];
 }
@@ -148,9 +154,25 @@ enum
 {
     [EAGLContext setCurrentContext:self.context];
     
+    
+    
+    NSDictionary * options = [NSDictionary dictionaryWithObjectsAndKeys:
+                              [NSNumber numberWithBool:YES],
+                              GLKTextureLoaderOriginBottomLeft,
+                              nil];
+    
+    NSError * error;
+    NSString *path = [[NSBundle mainBundle] pathForResource:@"tile_floor" ofType:@"png"];
+    _textureInfo = [GLKTextureLoader textureWithContentsOfFile:path options:options error:&error];
+    if (_textureInfo == nil) {
+        NSLog(@"Error loading file: %@", [error localizedDescription]);
+    }
+    
+    
     [self loadShaders];
     
     glEnable(GL_DEPTH_TEST);
+
     
     glGenVertexArraysOES(1, &_vertexArray);
     glBindVertexArrayOES(_vertexArray);
@@ -172,16 +194,22 @@ enum
     // Color
     glEnableVertexAttribArray(GLKVertexAttribColor);
     glVertexAttribPointer(GLKVertexAttribColor, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex), (const GLvoid *) offsetof(Vertex, Color));
-    
-    // Texture
-    glEnableVertexAttribArray(GLKVertexAttribTexCoord0);
-    glVertexAttribPointer(GLKVertexAttribTexCoord0, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (const GLvoid *) offsetof(Vertex, TexCoord));
-    
+
     // Normals
     glEnableVertexAttribArray(GLKVertexAttribNormal);
     glVertexAttribPointer(GLKVertexAttribNormal, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (const GLvoid *) offsetof(Vertex, Normal));
-
     
+    // Texture
+    glActiveTexture(GL_TEXTURE0);
+    glEnableVertexAttribArray(GLKVertexAttribTexCoord0);
+    glGenBuffers(1, &_textureBuffer);
+    glBindBuffer(GL_ARRAY_BUFFER, _textureBuffer);
+    glVertexAttribPointer(GLKVertexAttribTexCoord0, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (const GLvoid *) offsetof(Vertex, TexCoord));
+    glBufferData(GL_ARRAY_BUFFER, sizeof(Vertices), Vertices, GL_DYNAMIC_DRAW);    
+
+  
+    
+        
     glBindVertexArrayOES(0);
 }
 
@@ -207,7 +235,7 @@ enum
     
     GLKMatrix4 baseModelViewMatrix = GLKMatrix4MakeTranslation(0.0f, 0.0f, -4.0f);
     baseModelViewMatrix = GLKMatrix4Rotate(baseModelViewMatrix, 0.0f, 0.0f, 1.0f, 0.0f);
-
+    
     GLKMatrix4 modelViewMatrix = GLKMatrix4MakeTranslation(0.0f, 0.0f, 0.0f);
     modelViewMatrix = GLKMatrix4Rotate(modelViewMatrix, _startPoint.x/100, 0.0f, 1.0f, 0.0f);
     _dx = _dy = 0;
@@ -217,7 +245,7 @@ enum
     
     _modelViewProjectionMatrix = GLKMatrix4Multiply(projectionMatrix, modelViewMatrix);
     
-//    _rotation += self.timeSinceLastUpdate * 0.5f;
+    //    _rotation += self.timeSinceLastUpdate * 0.5f;
 }
 
 - (void)glkView:(GLKView *)view drawInRect:(CGRect)rect
@@ -226,11 +254,17 @@ enum
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     
     glBindVertexArrayOES(_vertexArray);
-
+    
     glUseProgram(_program);
+    
+ 
     
     glUniformMatrix4fv(uniforms[UNIFORM_MODELVIEWPROJECTION_MATRIX], 1, 0, _modelViewProjectionMatrix.m);
     glUniformMatrix3fv(uniforms[UNIFORM_NORMAL_MATRIX], 1, 0, _normalMatrix.m);
+    
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, [_textureInfo name]);
+    glUniform1i(uniforms[UNIFORM_TEXTURE], 0);
     
     glDrawElements(GL_TRIANGLES, sizeof(Indices)/sizeof(Indices[0]), GL_UNSIGNED_BYTE, 0);
 }
@@ -269,6 +303,7 @@ enum
     glBindAttribLocation(_program, GLKVertexAttribPosition, "position");
     glBindAttribLocation(_program, GLKVertexAttribNormal, "normal");
     glBindAttribLocation(_program, GLKVertexAttribColor, "color");
+    glBindAttribLocation(_program, GLKVertexAttribTexCoord0, "texCoord");
     
     // Link program.
     if (![self linkProgram:_program]) {
@@ -293,6 +328,7 @@ enum
     // Get uniform locations.
     uniforms[UNIFORM_MODELVIEWPROJECTION_MATRIX] = glGetUniformLocation(_program, "modelViewProjectionMatrix");
     uniforms[UNIFORM_NORMAL_MATRIX] = glGetUniformLocation(_program, "normalMatrix");
+    uniforms[UNIFORM_TEXTURE] = glGetUniformLocation(_program, "s_texture");
     
     // Release vertex and fragment shaders.
     if (vertShader) {

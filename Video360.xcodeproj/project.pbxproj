@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		010E3721174AD4B30029C96E /* Shader.fsh in Resources */ = {isa = PBXBuildFile; fileRef = 012C6765174A08CA0098A148 /* Shader.fsh */; };
+		010E3722174AD4B30029C96E /* Shader.vsh in Resources */ = {isa = PBXBuildFile; fileRef = 012C6766174A08CA0098A148 /* Shader.vsh */; };
 		012C66A5173A9F700098A148 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 012C66A4173A9F700098A148 /* UIKit.framework */; };
 		012C66A7173A9F700098A148 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 012C66A6173A9F700098A148 /* Foundation.framework */; };
 		012C66A9173A9F700098A148 /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 012C66A8173A9F700098A148 /* CoreGraphics.framework */; };
@@ -32,8 +34,6 @@
 		012C66F3174050B70098A148 /* CoreVideo.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 012C66F2174050B70098A148 /* CoreVideo.framework */; };
 		012C66F5174050BC0098A148 /* CoreMedia.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 012C66F4174050BC0098A148 /* CoreMedia.framework */; };
 		012C672D174A05260098A148 /* tile_floor.png in Resources */ = {isa = PBXBuildFile; fileRef = 012C672C174A05260098A148 /* tile_floor.png */; };
-		012C6769174A08DE0098A148 /* Shader.fsh in Resources */ = {isa = PBXBuildFile; fileRef = 012C6765174A08CA0098A148 /* Shader.fsh */; };
-		012C676A174A08DE0098A148 /* Shader.vsh in Resources */ = {isa = PBXBuildFile; fileRef = 012C6766174A08CA0098A148 /* Shader.vsh */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -279,8 +279,8 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				012C6769174A08DE0098A148 /* Shader.fsh in Resources */,
-				012C676A174A08DE0098A148 /* Shader.vsh in Resources */,
+				010E3721174AD4B30029C96E /* Shader.fsh in Resources */,
+				010E3722174AD4B30029C96E /* Shader.vsh in Resources */,
 				012C66B3173A9F700098A148 /* InfoPlist.strings in Resources */,
 				012C66BB173A9F700098A148 /* Default.png in Resources */,
 				012C66BD173A9F700098A148 /* Default@2x.png in Resources */,
