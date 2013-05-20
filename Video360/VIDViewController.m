@@ -57,12 +57,16 @@ enum
     
     GLKMatrix4 _modelViewProjectionMatrix;
     GLKMatrix3 _normalMatrix;
-    float _rotation;
+//    float _rotation;
     
     GLuint _vertexArray;
     
     GLuint _vertexBuffer;
     GLuint _indexBuffer;
+    
+    CGPoint _startPoint;
+    CGFloat _dx;
+    CGFloat _dy;
 
 }
 @property (strong, nonatomic) EAGLContext *context;
@@ -124,9 +128,20 @@ enum
     // Dispose of any resources that can be recreated.
 }
 
--(void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event
+#pragma mark touch events
+- (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event
 {
-    self.paused = !self.paused;
+    UITouch *touch = [touches anyObject];
+    _startPoint = [touch locationInView:self.view];
+}
+
+- (void)touchesMoved:(NSSet *)touches withEvent:(UIEvent *)event;
+{
+    UITouch *touch = [touches anyObject];
+    CGPoint point = [touch locationInView:self.view];
+    _dx = point.y - _startPoint.y;
+    _dy = point.x - _startPoint.x;
+    _startPoint = point;
 }
 
 - (void)setupGL
@@ -193,15 +208,16 @@ enum
     GLKMatrix4 baseModelViewMatrix = GLKMatrix4MakeTranslation(0.0f, 0.0f, -4.0f);
     baseModelViewMatrix = GLKMatrix4Rotate(baseModelViewMatrix, 0.0f, 0.0f, 1.0f, 0.0f);
 
-    GLKMatrix4 modelViewMatrix = GLKMatrix4MakeTranslation(0.0f, 0.0f, 1.5f);
-    modelViewMatrix = GLKMatrix4Rotate(modelViewMatrix, _rotation, 0.0f, 1.0f, 1.0f);
+    GLKMatrix4 modelViewMatrix = GLKMatrix4MakeTranslation(0.0f, 0.0f, 0.0f);
+    modelViewMatrix = GLKMatrix4Rotate(modelViewMatrix, _startPoint.x/100, 0.0f, 1.0f, 0.0f);
+    _dx = _dy = 0;
     modelViewMatrix = GLKMatrix4Multiply(baseModelViewMatrix, modelViewMatrix);
     
     _normalMatrix = GLKMatrix3InvertAndTranspose(GLKMatrix4GetMatrix3(modelViewMatrix), NULL);
     
     _modelViewProjectionMatrix = GLKMatrix4Multiply(projectionMatrix, modelViewMatrix);
     
-    _rotation += self.timeSinceLastUpdate * 0.5f;
+//    _rotation += self.timeSinceLastUpdate * 0.5f;
 }
 
 - (void)glkView:(GLKView *)view drawInRect:(CGRect)rect
