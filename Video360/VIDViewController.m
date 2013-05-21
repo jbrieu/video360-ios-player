@@ -8,7 +8,21 @@
 
 #import "VIDViewController.h"
 
+// Color Conversion Constants (YUV to RGB) including adjustment from 16-235/16-240 (video range)
 
+// BT.601, which is the standard for SDTV.
+static const GLfloat kColorConversion601[] = {
+    1.164,  1.164, 1.164,
+    0.0, -0.392, 2.017,
+    1.596, -0.813,   0.0,
+};
+
+// BT.709, which is the standard for HDTV.
+static const GLfloat kColorConversion709[] = {
+    1.164,  1.164, 1.164,
+    0.0, -0.213, 2.112,
+    1.793, -0.533,   0.0,
+};
 
 typedef struct {
     float Position[3];
@@ -72,6 +86,14 @@ enum
     
     GLKTextureInfo *_textureInfo;
     
+    AVPlayerItemVideoOutput* _videoOutput;
+    AVPlayer* _player;
+    AVPlayerItem* _playerItem;
+    
+    CVOpenGLESTextureRef _lumaTexture;
+	CVOpenGLESTextureCacheRef _videoTextureCache;
+    const GLfloat *_preferredConversion;
+    
 }
 @property (strong, nonatomic) EAGLContext *context;
 //@property (strong, nonatomic) GLKBaseEffect *effect;
@@ -105,6 +127,8 @@ enum
     _startPoint = CGPointMake(0.0f, 0.0f);
     
     [self setupGL];
+    
+    [self setupVideoPlayback];
 }
 
 - (void)dealloc
@@ -134,11 +158,49 @@ enum
     // Dispose of any resources that can be recreated.
 }
 
+#pragma mark video methods
+#warning TODO utiliser http://stackoverflow.com/questions/12500408/can-i-use-avfoundation-to-stream-downloaded-video-frames-into-an-opengl-es-textu/12500409#12500409
+#warning TODO : porter sur iOS5
+
+-(void)setupVideoPlayback
+{
+    NSURL *url = [[NSBundle mainBundle]
+                  URLForResource: @"demo" withExtension:@"mp4"];
+    
+    AVURLAsset *asset = [AVURLAsset URLAssetWithURL:url options:nil];
+    [asset loadValuesAsynchronouslyForKeys:[NSArray arrayWithObject:@"tracks"] completionHandler:^{
+        
+        NSError* error = nil;
+        AVKeyValueStatus status = [asset statusOfValueForKey:@"tracks" error:&error];
+        if (status == AVKeyValueStatusLoaded)
+        {
+            NSDictionary* settings = @{ (id)kCVPixelBufferPixelFormatTypeKey : [NSNumber numberWithInt:kCVPixelFormatType_32BGRA] };
+            _videoOutput = [[AVPlayerItemVideoOutput alloc] initWithPixelBufferAttributes:settings];
+            _playerItem = [AVPlayerItem playerItemWithAsset:asset];
+            [_playerItem addOutput:_videoOutput];
+            _player = [AVPlayer playerWithPlayerItem:_playerItem];
+            
+            
+            dispatch_async(dispatch_get_main_queue(), ^{
+                [_player play];
+            });
+            
+        }
+        else
+        {
+            NSLog(@"%@ Failed to load the tracks.", self);
+        }
+    }];
+}
+
+
 #pragma mark touch events
 - (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event
 {
     UITouch *touch = [touches anyObject];
     _startPoint = [touch locationInView:self.view];
+    
+    
 }
 
 - (void)touchesMoved:(NSSet *)touches withEvent:(UIEvent *)event;
@@ -172,7 +234,7 @@ enum
     [self loadShaders];
     
     glEnable(GL_DEPTH_TEST);
-
+    
     
     glGenVertexArraysOES(1, &_vertexArray);
     glBindVertexArrayOES(_vertexArray);
@@ -194,7 +256,7 @@ enum
     // Color
     glEnableVertexAttribArray(GLKVertexAttribColor);
     glVertexAttribPointer(GLKVertexAttribColor, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex), (const GLvoid *) offsetof(Vertex, Color));
-
+    
     // Normals
     glEnableVertexAttribArray(GLKVertexAttribNormal);
     glVertexAttribPointer(GLKVertexAttribNormal, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (const GLvoid *) offsetof(Vertex, Normal));
@@ -205,11 +267,19 @@ enum
     glGenBuffers(1, &_textureBuffer);
     glBindBuffer(GL_ARRAY_BUFFER, _textureBuffer);
     glVertexAttribPointer(GLKVertexAttribTexCoord0, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (const GLvoid *) offsetof(Vertex, TexCoord));
-    glBufferData(GL_ARRAY_BUFFER, sizeof(Vertices), Vertices, GL_DYNAMIC_DRAW);    
-
-  
+    glBufferData(GL_ARRAY_BUFFER, sizeof(Vertices), Vertices, GL_DYNAMIC_DRAW);
     
-        
+    // Create CVOpenGLESTextureCacheRef for optimal CVPixelBufferRef to GLES texture conversion.
+	if (!_videoTextureCache) {
+		CVReturn err = CVOpenGLESTextureCacheCreate(kCFAllocatorDefault, NULL, _context, NULL, &_videoTextureCache);
+		if (err != noErr) {
+			NSLog(@"Error at CVOpenGLESTextureCacheCreate %d", err);
+			return;
+		}
+	}
+    
+    
+    
     glBindVertexArrayOES(0);
 }
 
@@ -246,6 +316,20 @@ enum
     _modelViewProjectionMatrix = GLKMatrix4Multiply(projectionMatrix, modelViewMatrix);
     
     //    _rotation += self.timeSinceLastUpdate * 0.5f;
+    
+}
+
+- (void)cleanUpTextures
+{
+    if (_lumaTexture) {
+        CFRelease(_lumaTexture);
+        _lumaTexture = NULL;
+    }
+    
+    
+	
+	// Periodic texture cache flush every frame
+	CVOpenGLESTextureCacheFlush(_videoTextureCache, 0);
 }
 
 - (void)glkView:(GLKView *)view drawInRect:(CGRect)rect
@@ -257,14 +341,77 @@ enum
     
     glUseProgram(_program);
     
- 
+    
     
     glUniformMatrix4fv(uniforms[UNIFORM_MODELVIEWPROJECTION_MATRIX], 1, 0, _modelViewProjectionMatrix.m);
     glUniformMatrix3fv(uniforms[UNIFORM_NORMAL_MATRIX], 1, 0, _normalMatrix.m);
     
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, [_textureInfo name]);
-    glUniform1i(uniforms[UNIFORM_TEXTURE], 0);
+    CVPixelBufferRef pixelBuffer = [_videoOutput copyPixelBufferForItemTime:[_playerItem currentTime] itemTimeForDisplay:nil];
+    
+    CVReturn err;
+	if (pixelBuffer != NULL) {
+		int frameWidth = CVPixelBufferGetWidth(pixelBuffer);
+		int frameHeight = CVPixelBufferGetHeight(pixelBuffer);
+		
+		if (!_videoTextureCache) {
+			NSLog(@"No video texture cache");
+			return;
+		}
+		
+		[self cleanUpTextures];
+		
+		
+		/*
+		 Use the color attachment of the pixel buffer to determine the appropriate color conversion matrix.
+		 */
+		CFTypeRef colorAttachments = CVBufferGetAttachment(pixelBuffer, kCVImageBufferYCbCrMatrixKey, NULL);
+		
+		if (colorAttachments == kCVImageBufferYCbCrMatrix_ITU_R_601_4) {
+			_preferredConversion = kColorConversion601;
+		}
+		else {
+			_preferredConversion = kColorConversion709;
+		}
+		
+		/*
+         CVOpenGLESTextureCacheCreateTextureFromImage will create GLES texture optimally from CVPixelBufferRef.
+         */
+		
+		/*
+         Create Y and UV textures from the pixel buffer. These textures will be drawn on the frame buffer Y-plane.
+         */
+		glActiveTexture(GL_TEXTURE0);
+		err = CVOpenGLESTextureCacheCreateTextureFromImage(kCFAllocatorDefault,
+														   _videoTextureCache,
+														   pixelBuffer,
+														   NULL,
+														   GL_TEXTURE_2D,
+														   GL_RED_EXT,
+														   frameWidth,
+														   frameHeight,
+														   GL_RED_EXT,
+														   GL_UNSIGNED_BYTE,
+														   0,
+														   &_lumaTexture);
+		if (err) {
+			NSLog(@"Error at CVOpenGLESTextureCacheCreateTextureFromImage %d", err);
+		}
+		
+		glBindTexture(CVOpenGLESTextureGetTarget(_lumaTexture), CVOpenGLESTextureGetName(_lumaTexture));
+        glUniform1i(uniforms[UNIFORM_TEXTURE], 0); // TODO faire ça dans le setupgl une seule fois
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        
+        
+        CFRelease(pixelBuffer);
+    }
+    
+    
+    //    glActiveTexture(GL_TEXTURE0);
+    //    glBindTexture(GL_TEXTURE_2D, [_textureInfo name]);
+    //    glUniform1i(uniforms[UNIFORM_TEXTURE], 0);
     
     glDrawElements(GL_TRIANGLES, sizeof(Indices)/sizeof(Indices[0]), GL_UNSIGNED_BYTE, 0);
 }
