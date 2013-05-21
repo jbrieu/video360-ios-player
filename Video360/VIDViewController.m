@@ -32,10 +32,10 @@ typedef struct {
 } Vertex;
 
 const Vertex Vertices[] = {
-    {{1, -1, 0}, {0, 0, 1}, {1, 0, 0, 1}, {1, 0}},
-    {{1, 1, 0},  {0, 0, 1},{0, 1, 0, 1},{1, 1} },
-    {{-1, 1, 0},  {0, 0, 1},{0, 0, 1, 1},{0, 1}},
-    {{-1, -1, 0},  {0, 0, 1},{0, 0, 0, 1},{0, 0}}
+    {{1, -1, 0}, {0, 0, 1}, {1, 0, 0, 1}, {1, 1}},
+    {{1, 1, 0},  {0, 0, 1},{0, 1, 0, 1},{1, 0} },
+    {{-1, 1, 0},  {0, 0, 1},{0, 0, 1, 1},{0, 0}},
+    {{-1, -1, 0},  {0, 0, 1},{0, 0, 0, 1},{0, 1}}
 };
 
 
@@ -159,7 +159,6 @@ enum
 }
 
 #pragma mark video methods
-#warning TODO utiliser http://stackoverflow.com/questions/12500408/can-i-use-avfoundation-to-stream-downloaded-video-frames-into-an-opengl-es-textu/12500409#12500409
 #warning TODO : porter sur iOS5
 
 -(void)setupVideoPlayback
@@ -366,6 +365,7 @@ enum
 		 */
 		CFTypeRef colorAttachments = CVBufferGetAttachment(pixelBuffer, kCVImageBufferYCbCrMatrixKey, NULL);
 		
+        // ça vaut Zéro, il faut changer
 		if (colorAttachments == kCVImageBufferYCbCrMatrix_ITU_R_601_4) {
 			_preferredConversion = kColorConversion601;
 		}
@@ -386,10 +386,10 @@ enum
 														   pixelBuffer,
 														   NULL,
 														   GL_TEXTURE_2D,
-														   GL_RED_EXT,
+														   GL_RGBA,
 														   frameWidth,
 														   frameHeight,
-														   GL_RED_EXT,
+														   GL_RGBA,
 														   GL_UNSIGNED_BYTE,
 														   0,
 														   &_lumaTexture);

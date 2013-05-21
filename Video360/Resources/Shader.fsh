@@ -6,7 +6,7 @@
 //  Copyright (c) 2013 Video360 Developper. All rights reserved.
 //
 
-varying lowp vec4 colorVarying;
+//varying lowp vec4 colorVarying;
 
 uniform sampler2D s_texture;
 varying mediump vec2 v_textureCoordinate;
@@ -14,5 +14,5 @@ varying mediump vec2 v_textureCoordinate;
 void main()
 {
     //gl_FragColor = colorVarying;
-    gl_FragColor = texture2D( s_texture, v_textureCoordinate) * colorVarying;
+    gl_FragColor = texture2D(s_texture, v_textureCoordinate);
 }

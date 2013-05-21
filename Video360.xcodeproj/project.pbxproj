@@ -199,8 +199,8 @@
 		012C66EC17404F590098A148 /* Resources */ = {
 			isa = PBXGroup;
 			children = (
-				012C6765174A08CA0098A148 /* Shader.fsh */,
 				012C6766174A08CA0098A148 /* Shader.vsh */,
+				012C6765174A08CA0098A148 /* Shader.fsh */,
 				012C672C174A05260098A148 /* tile_floor.png */,
 				012C66ED17404F590098A148 /* demo.mp4 */,
 			);
