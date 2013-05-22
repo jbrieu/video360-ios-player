@@ -49,7 +49,9 @@ enum
 {
     UNIFORM_MODELVIEWPROJECTION_MATRIX,
     UNIFORM_NORMAL_MATRIX,
-    UNIFORM_TEXTURE,
+    UNIFORM_Y,
+    UNIFORM_UV,
+    UNIFORM_COLOR_CONVERSION_MATRIX,
     NUM_UNIFORMS
 };
 GLint uniforms[NUM_UNIFORMS];
@@ -84,19 +86,17 @@ enum
     CGFloat _dx;
     CGFloat _dy;
     
-    GLKTextureInfo *_textureInfo;
-    
     AVPlayerItemVideoOutput* _videoOutput;
     AVPlayer* _player;
     AVPlayerItem* _playerItem;
     
     CVOpenGLESTextureRef _lumaTexture;
+    CVOpenGLESTextureRef _chromaTexture;
 	CVOpenGLESTextureCacheRef _videoTextureCache;
     const GLfloat *_preferredConversion;
     
 }
 @property (strong, nonatomic) EAGLContext *context;
-//@property (strong, nonatomic) GLKBaseEffect *effect;
 
 - (void)setupGL;
 - (void)tearDownGL;
@@ -125,6 +125,9 @@ enum
     view.drawableMultisample = GLKViewDrawableMultisample4X;
     
     _startPoint = CGPointMake(0.0f, 0.0f);
+    
+    // Set the default conversion to BT.709, which is the standard for HDTV.
+    _preferredConversion = kColorConversion709;
     
     [self setupGL];
     
@@ -173,7 +176,7 @@ enum
         AVKeyValueStatus status = [asset statusOfValueForKey:@"tracks" error:&error];
         if (status == AVKeyValueStatusLoaded)
         {
-            NSDictionary* settings = @{ (id)kCVPixelBufferPixelFormatTypeKey : [NSNumber numberWithInt:kCVPixelFormatType_32BGRA] };
+            NSDictionary* settings = @{ (id)kCVPixelBufferPixelFormatTypeKey : [NSNumber numberWithInt:kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange]};
             _videoOutput = [[AVPlayerItemVideoOutput alloc] initWithPixelBufferAttributes:settings];
             _playerItem = [AVPlayerItem playerItemWithAsset:asset];
             [_playerItem addOutput:_videoOutput];
@@ -215,24 +218,12 @@ enum
 {
     [EAGLContext setCurrentContext:self.context];
     
-    
-    
-    NSDictionary * options = [NSDictionary dictionaryWithObjectsAndKeys:
-                              [NSNumber numberWithBool:YES],
-                              GLKTextureLoaderOriginBottomLeft,
-                              nil];
-    
-    NSError * error;
-    NSString *path = [[NSBundle mainBundle] pathForResource:@"tile_floor" ofType:@"png"];
-    _textureInfo = [GLKTextureLoader textureWithContentsOfFile:path options:options error:&error];
-    if (_textureInfo == nil) {
-        NSLog(@"Error loading file: %@", [error localizedDescription]);
-    }
-    
-    
     [self loadShaders];
     
     glEnable(GL_DEPTH_TEST);
+    
+    glUseProgram(_program);
+
     
     
     glGenVertexArraysOES(1, &_vertexArray);
@@ -277,6 +268,9 @@ enum
 		}
 	}
     
+    glUniform1i(uniforms[UNIFORM_Y], 0);
+    glUniform1i(uniforms[UNIFORM_UV], 1);    
+    glUniformMatrix3fv(uniforms[UNIFORM_COLOR_CONVERSION_MATRIX], 1, GL_FALSE, _preferredConversion);
     
     
     glBindVertexArrayOES(0);
@@ -325,25 +319,19 @@ enum
         _lumaTexture = NULL;
     }
     
+    if(_chromaTexture)
+    {
+        CFRelease(_chromaTexture);
+        _chromaTexture = NULL;
+    }
     
-	
+    
 	// Periodic texture cache flush every frame
 	CVOpenGLESTextureCacheFlush(_videoTextureCache, 0);
 }
 
 - (void)glkView:(GLKView *)view drawInRect:(CGRect)rect
 {
-    glClearColor(0.65f, 0.65f, 0.65f, 1.0f);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    
-    glBindVertexArrayOES(_vertexArray);
-    
-    glUseProgram(_program);
-    
-    
-    
-    glUniformMatrix4fv(uniforms[UNIFORM_MODELVIEWPROJECTION_MATRIX], 1, 0, _modelViewProjectionMatrix.m);
-    glUniformMatrix3fv(uniforms[UNIFORM_NORMAL_MATRIX], 1, 0, _normalMatrix.m);
     
     CVPixelBufferRef pixelBuffer = [_videoOutput copyPixelBufferForItemTime:[_playerItem currentTime] itemTimeForDisplay:nil];
     
@@ -365,7 +353,6 @@ enum
 		 */
 		CFTypeRef colorAttachments = CVBufferGetAttachment(pixelBuffer, kCVImageBufferYCbCrMatrixKey, NULL);
 		
-        // ça vaut Zéro, il faut changer
 		if (colorAttachments == kCVImageBufferYCbCrMatrix_ITU_R_601_4) {
 			_preferredConversion = kColorConversion601;
 		}
@@ -373,23 +360,17 @@ enum
 			_preferredConversion = kColorConversion709;
 		}
 		
-		/*
-         CVOpenGLESTextureCacheCreateTextureFromImage will create GLES texture optimally from CVPixelBufferRef.
-         */
-		
-		/*
-         Create Y and UV textures from the pixel buffer. These textures will be drawn on the frame buffer Y-plane.
-         */
-		glActiveTexture(GL_TEXTURE0);
+        
+        glActiveTexture(GL_TEXTURE0);
 		err = CVOpenGLESTextureCacheCreateTextureFromImage(kCFAllocatorDefault,
 														   _videoTextureCache,
 														   pixelBuffer,
 														   NULL,
 														   GL_TEXTURE_2D,
-														   GL_RGBA,
+														   GL_RED_EXT,
 														   frameWidth,
 														   frameHeight,
-														   GL_RGBA,
+														   GL_RED_EXT,
 														   GL_UNSIGNED_BYTE,
 														   0,
 														   &_lumaTexture);
@@ -398,7 +379,30 @@ enum
 		}
 		
 		glBindTexture(CVOpenGLESTextureGetTarget(_lumaTexture), CVOpenGLESTextureGetName(_lumaTexture));
-        glUniform1i(uniforms[UNIFORM_TEXTURE], 0); // TODO faire ça dans le setupgl une seule fois
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+		
+		// UV-plane.
+		glActiveTexture(GL_TEXTURE1);
+		err = CVOpenGLESTextureCacheCreateTextureFromImage(kCFAllocatorDefault,
+														   _videoTextureCache,
+														   pixelBuffer,
+														   NULL,
+														   GL_TEXTURE_2D,
+														   GL_RG_EXT,
+														   frameWidth / 2,
+														   frameHeight / 2,
+														   GL_RG_EXT,
+														   GL_UNSIGNED_BYTE,
+														   1,
+														   &_chromaTexture);
+		if (err) {
+			NSLog(@"Error at CVOpenGLESTextureCacheCreateTextureFromImage %d", err);
+		}
+		
+		glBindTexture(CVOpenGLESTextureGetTarget(_chromaTexture), CVOpenGLESTextureGetName(_chromaTexture));
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
@@ -408,11 +412,20 @@ enum
         CFRelease(pixelBuffer);
     }
     
+    glClearColor(0.65f, 0.65f, 0.65f, 1.0f);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     
-    //    glActiveTexture(GL_TEXTURE0);
-    //    glBindTexture(GL_TEXTURE_2D, [_textureInfo name]);
-    //    glUniform1i(uniforms[UNIFORM_TEXTURE], 0);
+    glBindVertexArrayOES(_vertexArray);
     
+    
+    
+    glUseProgram(_program);
+    
+    
+    glUniformMatrix4fv(uniforms[UNIFORM_MODELVIEWPROJECTION_MATRIX], 1, 0, _modelViewProjectionMatrix.m);
+    glUniformMatrix3fv(uniforms[UNIFORM_NORMAL_MATRIX], 1, 0, _normalMatrix.m);
+    glUniformMatrix3fv(uniforms[UNIFORM_COLOR_CONVERSION_MATRIX], 1, GL_FALSE, _preferredConversion);
+
     glDrawElements(GL_TRIANGLES, sizeof(Indices)/sizeof(Indices[0]), GL_UNSIGNED_BYTE, 0);
 }
 #pragma mark -  OpenGL ES 2 shader compilation
@@ -475,7 +488,9 @@ enum
     // Get uniform locations.
     uniforms[UNIFORM_MODELVIEWPROJECTION_MATRIX] = glGetUniformLocation(_program, "modelViewProjectionMatrix");
     uniforms[UNIFORM_NORMAL_MATRIX] = glGetUniformLocation(_program, "normalMatrix");
-    uniforms[UNIFORM_TEXTURE] = glGetUniformLocation(_program, "s_texture");
+	uniforms[UNIFORM_Y] = glGetUniformLocation(_program, "SamplerY");
+    uniforms[UNIFORM_UV] = glGetUniformLocation(_program, "SamplerUV");
+    uniforms[UNIFORM_COLOR_CONVERSION_MATRIX] = glGetUniformLocation(_program, "colorConversionMatrix");
     
     // Release vertex and fragment shaders.
     if (vertShader) {
