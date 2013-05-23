@@ -7,6 +7,8 @@
 //
 
 #import "VIDViewController.h"
+#import "sphere5.h"
+#import "GLProgram.h"
 
 // Color Conversion Constants (YUV to RGB) including adjustment from 16-235/16-240 (video range)
 
@@ -24,31 +26,30 @@ static const GLfloat kColorConversion709[] = {
     1.793, -0.533,   0.0,
 };
 
-typedef struct {
-    float Position[3];
-    float Normal[3];
-    float Color[4];
-    float TexCoord[2];
-} Vertex;
-
-const Vertex Vertices[] = {
-    {{1, -1, 0}, {0, 0, 1}, {1, 0, 0, 1}, {1, 1}},
-    {{1, 1, 0},  {0, 0, 1},{0, 1, 0, 1},{1, 0} },
-    {{-1, 1, 0},  {0, 0, 1},{0, 0, 1, 1},{0, 0}},
-    {{-1, -1, 0},  {0, 0, 1},{0, 0, 0, 1},{0, 1}}
-};
-
-
-const GLubyte Indices[] = {
-    0, 1, 2,
-    2, 3, 0
-};
+//typedef struct {
+//    float Position[3];
+//    float Normal[3];
+//    float Color[4];
+//    float TexCoord[2];
+//} Vertex;
+//
+//const Vertex Vertices[] = {
+//    {{1, -1, 0}, {0, 0, 1}, {1, 0, 0, 1}, {1, 1}},
+//    {{1, 1, 0},  {0, 0, 1},{0, 1, 0, 1},{1, 0} },
+//    {{-1, 1, 0},  {0, 0, 1},{0, 0, 1, 1},{0, 0}},
+//    {{-1, -1, 0},  {0, 0, 1},{0, 0, 0, 1},{0, 1}}
+//};
+//
+//
+//const GLubyte Indices[] = {
+//    0, 1, 2,
+//    2, 3, 0
+//};
 
 // Uniform index.
 enum
 {
     UNIFORM_MODELVIEWPROJECTION_MATRIX,
-    UNIFORM_NORMAL_MATRIX,
     UNIFORM_Y,
     UNIFORM_UV,
     UNIFORM_COLOR_CONVERSION_MATRIX,
@@ -60,8 +61,6 @@ GLint uniforms[NUM_UNIFORMS];
 enum
 {
     ATTRIB_VERTEX,
-    ATTRIB_NORMAL,
-    ATTRIBUT_COLOR,
     ATTRIBUT_TEXCOORD,
     NUM_ATTRIBUTES
 };
@@ -70,21 +69,25 @@ enum
 
 @interface VIDViewController ()
 {
-    GLuint _program;
     
     GLKMatrix4 _modelViewProjectionMatrix;
-    GLKMatrix3 _normalMatrix;
+    //    GLKMatrix3 _normalMatrix;
     //    float _rotation;
     
-    GLuint _vertexArray;
+    //    GLuint _vertexArray;
+    //
+    //    GLuint _vertexBuffer;
+    //    GLuint _indexBuffer;
+    //    GLuint _textureBuffer;
     
-    GLuint _vertexBuffer;
-    GLuint _indexBuffer;
-    GLuint _textureBuffer;
+    GLuint _vertexArrayID;
+    GLuint _vertexBufferID;
+    GLuint _vertexTexCoordID;
+    GLuint _vertexTexCoordAttributeIndex;
     
-    CGPoint _startPoint;
-    CGFloat _dx;
-    CGFloat _dy;
+    float _rotationX;
+    float _rotationY;
+    
     
     AVPlayerItemVideoOutput* _videoOutput;
     AVPlayer* _player;
@@ -97,14 +100,17 @@ enum
     
 }
 @property (strong, nonatomic) EAGLContext *context;
+@property (strong, nonatomic) GLProgram *program;
+@property (strong, nonatomic) NSMutableArray *currentTouches;
 
 - (void)setupGL;
 - (void)tearDownGL;
+- (void)buildProgram;
 
-- (BOOL)loadShaders;
-- (BOOL)compileShader:(GLuint *)shader type:(GLenum)type file:(NSString *)file;
-- (BOOL)linkProgram:(GLuint)prog;
-- (BOOL)validateProgram:(GLuint)prog;
+//- (BOOL)loadShaders;
+//- (BOOL)compileShader:(GLuint *)shader type:(GLenum)type file:(NSString *)file;
+//- (BOOL)linkProgram:(GLuint)prog;
+//- (BOOL)validateProgram:(GLuint)prog;
 
 @end
 
@@ -124,7 +130,9 @@ enum
     view.drawableDepthFormat = GLKViewDrawableDepthFormat24;
     view.drawableMultisample = GLKViewDrawableMultisample4X;
     
-    _startPoint = CGPointMake(0.0f, 0.0f);
+    
+    
+    //self.preferredFramesPerSecond = 30.0f;
     
     // Set the default conversion to BT.709, which is the standard for HDTV.
     _preferredConversion = kColorConversion709;
@@ -196,68 +204,102 @@ enum
 }
 
 
-#pragma mark touch events
-- (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event
-{
-    UITouch *touch = [touches anyObject];
-    _startPoint = [touch locationInView:self.view];
-    
-    
-}
-
-- (void)touchesMoved:(NSSet *)touches withEvent:(UIEvent *)event;
-{
-    UITouch *touch = [touches anyObject];
-    CGPoint point = [touch locationInView:self.view];
-    _dx = point.y - _startPoint.y;
-    _dy = point.x - _startPoint.x;
-    _startPoint = point;
-}
+#pragma mark setup gl
 
 - (void)setupGL
 {
     [EAGLContext setCurrentContext:self.context];
-    
-    [self loadShaders];
-    
-    glEnable(GL_DEPTH_TEST);
-    
-    glUseProgram(_program);
 
+    [self buildProgram];
     
     
-    glGenVertexArraysOES(1, &_vertexArray);
-    glBindVertexArrayOES(_vertexArray);
+    // glUseProgram(_program);
     
-    // Vertex
-    glGenBuffers(1, &_vertexBuffer);
-    glBindBuffer(GL_ARRAY_BUFFER, _vertexBuffer);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(Vertices), Vertices, GL_STATIC_DRAW);
     
-    // Index
-    glGenBuffers(1, &_indexBuffer);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _indexBuffer);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(Indices), Indices, GL_STATIC_DRAW);
     
-    // Position
+    //    glGenVertexArraysOES(1, &_vertexArray);
+    //    glBindVertexArrayOES(_vertexArray);
+    //
+    //    // Vertex
+    //    glGenBuffers(1, &_vertexBuffer);
+    //    glBindBuffer(GL_ARRAY_BUFFER, _vertexBuffer);
+    //    glBufferData(GL_ARRAY_BUFFER, sizeof(Vertices), Vertices, GL_STATIC_DRAW);
+    //
+    //    // Index
+    //    glGenBuffers(1, &_indexBuffer);
+    //    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _indexBuffer);
+    //    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(Indices), Indices, GL_STATIC_DRAW);
+    //
+    //    // Position
+    //    glEnableVertexAttribArray(GLKVertexAttribPosition);
+    //    glVertexAttribPointer(GLKVertexAttribPosition, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (const GLvoid *) offsetof(Vertex, Position));
+    //
+    //    // Color
+    //    glEnableVertexAttribArray(GLKVertexAttribColor);
+    //    glVertexAttribPointer(GLKVertexAttribColor, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex), (const GLvoid *) offsetof(Vertex, Color));
+    //
+    //    // Normals
+    //    glEnableVertexAttribArray(GLKVertexAttribNormal);
+    //    glVertexAttribPointer(GLKVertexAttribNormal, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (const GLvoid *) offsetof(Vertex, Normal));
+    // Send the Object's Vertices & Texture Coordinates:
+    
+    // This vertex array will refer to all of the following vertex data. We can restore
+    // the data whenever we want by simply calling glBindVertexArrayOES(_vertexArrayID);
+    // as shown in the glkView:drawInRect: method.
+    glGenVertexArraysOES(1, &_vertexArrayID);
+    glBindVertexArrayOES(_vertexArrayID);
+    
+    //Generate a unique identifier for the buffer.
+    glGenBuffers(1, &_vertexBufferID);
+    //Bind the buffer for subsequent operations.
+    glBindBuffer(GL_ARRAY_BUFFER, _vertexBufferID);
+    //Send the actual vertex data to the buffer.
+    glBufferData(GL_ARRAY_BUFFER,
+                 //Specify number of vertices contained in the vertex array.
+                 sizeof(sphere5Verts),
+                 //Specify the array to pull the vertices from.
+                 sphere5Verts,
+                 //Tell OpenGL to store vertices statically or dynamically
+                 GL_STATIC_DRAW);
+    //Enable use of currently bound buffer.
     glEnableVertexAttribArray(GLKVertexAttribPosition);
-    glVertexAttribPointer(GLKVertexAttribPosition, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (const GLvoid *) offsetof(Vertex, Position));
+    //Tell OpenGL how to interpret the data.
+    glVertexAttribPointer(GLKVertexAttribPosition,
+                          //Each vertex has three components (x,y,z).
+                          3,
+                          //Data is of type floating point
+                          GL_FLOAT,
+                          //No fixed point scaling - will alwyas be false with ES
+                          GL_FALSE,
+                          //Size of each vertex. Contains 3 floats for x,y,z.
+                          sizeof(float) * 3,
+                          //Where to start reading each vertex; used for interleaving.
+                          NULL);
     
-    // Color
-    glEnableVertexAttribArray(GLKVertexAttribColor);
-    glVertexAttribPointer(GLKVertexAttribColor, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex), (const GLvoid *) offsetof(Vertex, Color));
-    
-    // Normals
-    glEnableVertexAttribArray(GLKVertexAttribNormal);
-    glVertexAttribPointer(GLKVertexAttribNormal, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (const GLvoid *) offsetof(Vertex, Normal));
-    
+    //This process is the same as above, but for texture
+    //coordinates instead of position coordinates.
+    //Since our positions & tex coords are not interleaved, we
+    //need to generate a separate buffer object for each.
+    glGenBuffers(1, &_vertexTexCoordID);
+    glBindBuffer(GL_ARRAY_BUFFER, _vertexTexCoordID);
+    glBufferData(GL_ARRAY_BUFFER,
+                 sizeof(sphere5TexCoords),
+                 sphere5TexCoords,
+                 GL_DYNAMIC_DRAW);
+    glEnableVertexAttribArray(_vertexTexCoordAttributeIndex);
+    glVertexAttribPointer(_vertexTexCoordAttributeIndex,
+                          2,
+                          GL_FLOAT,
+                          GL_FALSE,
+                          sizeof(float) * 2,
+                          NULL);
     // Texture
-    glActiveTexture(GL_TEXTURE0);
-    glEnableVertexAttribArray(GLKVertexAttribTexCoord0);
-    glGenBuffers(1, &_textureBuffer);
-    glBindBuffer(GL_ARRAY_BUFFER, _textureBuffer);
-    glVertexAttribPointer(GLKVertexAttribTexCoord0, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (const GLvoid *) offsetof(Vertex, TexCoord));
-    glBufferData(GL_ARRAY_BUFFER, sizeof(Vertices), Vertices, GL_DYNAMIC_DRAW);
+    //    glActiveTexture(GL_TEXTURE0);
+    //    glEnableVertexAttribArray(GLKVertexAttribTexCoord0);
+    //    glGenBuffers(1, &_textureBuffer);
+    //    glBindBuffer(GL_ARRAY_BUFFER, _textureBuffer);
+    //    glVertexAttribPointer(GLKVertexAttribTexCoord0, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (const GLvoid *) offsetof(Vertex, TexCoord));
+    //    glBufferData(GL_ARRAY_BUFFER, sizeof(Vertices), Vertices, GL_DYNAMIC_DRAW);
     
     // Create CVOpenGLESTextureCacheRef for optimal CVPixelBufferRef to GLES texture conversion.
 	if (!_videoTextureCache) {
@@ -268,50 +310,27 @@ enum
 		}
 	}
     
-    glUniform1i(uniforms[UNIFORM_Y], 0);
-    glUniform1i(uniforms[UNIFORM_UV], 1);    
-    glUniformMatrix3fv(uniforms[UNIFORM_COLOR_CONVERSION_MATRIX], 1, GL_FALSE, _preferredConversion);
+    //glUniform1i(uniforms[UNIFORM_Y], 0);
+    // glUniform1i(uniforms[UNIFORM_UV], 1);
+    //  glUniformMatrix3fv(uniforms[UNIFORM_COLOR_CONVERSION_MATRIX], 1, GL_FALSE, _preferredConversion);
     
     
-    glBindVertexArrayOES(0);
+    //    glBindVertexArrayOES(0);
 }
 
 - (void)tearDownGL
 {
     [EAGLContext setCurrentContext:self.context];
     
-    glDeleteBuffers(1, &_vertexBuffer);
-    glDeleteVertexArraysOES(1, &_vertexArray);
+    glDeleteBuffers(1, &_vertexBufferID);
+    glDeleteVertexArraysOES(1, &_vertexArrayID);
+    glDeleteBuffers(1, &_vertexTexCoordID);
     
-    if (_program) {
-        glDeleteProgram(_program);
-        _program = 0;
-    }
+    _program = nil;
+    _videoTextureCache = nil;
 }
 
-#pragma mark - GLKView and GLKViewController delegate methods
-
-- (void)update
-{
-    float aspect = fabsf(self.view.bounds.size.width / self.view.bounds.size.height);
-    GLKMatrix4 projectionMatrix = GLKMatrix4MakePerspective(GLKMathDegreesToRadians(65.0f), aspect, 0.1f, 100.0f);
-    
-    GLKMatrix4 baseModelViewMatrix = GLKMatrix4MakeTranslation(0.0f, 0.0f, -4.0f);
-    baseModelViewMatrix = GLKMatrix4Rotate(baseModelViewMatrix, 0.0f, 0.0f, 1.0f, 0.0f);
-    
-    GLKMatrix4 modelViewMatrix = GLKMatrix4MakeTranslation(0.0f, 0.0f, 0.0f);
-    modelViewMatrix = GLKMatrix4Rotate(modelViewMatrix, _startPoint.x/100, 0.0f, 1.0f, 0.0f);
-    _dx = _dy = 0;
-    modelViewMatrix = GLKMatrix4Multiply(baseModelViewMatrix, modelViewMatrix);
-    
-    _normalMatrix = GLKMatrix3InvertAndTranspose(GLKMatrix4GetMatrix3(modelViewMatrix), NULL);
-    
-    _modelViewProjectionMatrix = GLKMatrix4Multiply(projectionMatrix, modelViewMatrix);
-    
-    //    _rotation += self.timeSinceLastUpdate * 0.5f;
-    
-}
-
+#pragma mark texture cleanup
 - (void)cleanUpTextures
 {
     if (_lumaTexture) {
@@ -329,6 +348,27 @@ enum
 	// Periodic texture cache flush every frame
 	CVOpenGLESTextureCacheFlush(_videoTextureCache, 0);
 }
+
+#pragma mark - GLKView and GLKViewController delegate methods
+
+- (void)update
+{
+    
+    float aspect = fabsf(self.view.bounds.size.width / self.view.bounds.size.height);
+    GLKMatrix4 projectionMatrix = GLKMatrix4MakePerspective(GLKMathDegreesToRadians(65.0f),
+                                                            aspect,
+                                                            0.1f,
+                                                            100.0f);
+    
+    GLKMatrix4 modelViewMatrix = GLKMatrix4Identity;
+    modelViewMatrix = GLKMatrix4Rotate(modelViewMatrix, _rotationX, 1.0f, 0.0f, 0.0f);
+    modelViewMatrix = GLKMatrix4Rotate(modelViewMatrix, _rotationY, 0.0f, 1.0f, 0.0f);
+    
+    
+    _modelViewProjectionMatrix = GLKMatrix4Multiply(projectionMatrix, modelViewMatrix);
+}
+
+
 
 - (void)glkView:(GLKView *)view drawInRect:(CGRect)rect
 {
@@ -412,178 +452,91 @@ enum
         CFRelease(pixelBuffer);
     }
     
-    glClearColor(0.65f, 0.65f, 0.65f, 1.0f);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    
-    glBindVertexArrayOES(_vertexArray);
     
     
     
-    glUseProgram(_program);
+    [_program use];
     
+    glBindVertexArrayOES(_vertexArrayID);
+    
+    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+    glClear(GL_COLOR_BUFFER_BIT);
     
     glUniformMatrix4fv(uniforms[UNIFORM_MODELVIEWPROJECTION_MATRIX], 1, 0, _modelViewProjectionMatrix.m);
-    glUniformMatrix3fv(uniforms[UNIFORM_NORMAL_MATRIX], 1, 0, _normalMatrix.m);
     glUniformMatrix3fv(uniforms[UNIFORM_COLOR_CONVERSION_MATRIX], 1, GL_FALSE, _preferredConversion);
-
-    glDrawElements(GL_TRIANGLES, sizeof(Indices)/sizeof(Indices[0]), GL_UNSIGNED_BYTE, 0);
+    
+    glDrawArrays(GL_TRIANGLES, 0, sphere5NumVerts);
+    
 }
-#pragma mark -  OpenGL ES 2 shader compilation
 
-- (BOOL)loadShaders
+#pragma mark - OpenGL Program
+/////////////////////////////
+- (void)buildProgram
 {
-    GLuint vertShader, fragShader;
-    NSString *vertShaderPathname, *fragShaderPathname;
+    //Create program
     
-    // Create shader program.
-    _program = glCreateProgram();
+    _program = [[GLProgram alloc]
+                initWithVertexShaderFilename:@"Shader"
+                fragmentShaderFilename:@"Shader"];
     
-    // Create and compile vertex shader.
-    vertShaderPathname = [[NSBundle mainBundle] pathForResource:@"Shader" ofType:@"vsh"];
-    if (![self compileShader:&vertShader type:GL_VERTEX_SHADER file:vertShaderPathname]) {
-        NSLog(@"Failed to compile vertex shader");
-        return NO;
-    }
+    //Assign Attributes
     
-    // Create and compile fragment shader.
-    fragShaderPathname = [[NSBundle mainBundle] pathForResource:@"Shader" ofType:@"fsh"];
-    if (![self compileShader:&fragShader type:GL_FRAGMENT_SHADER file:fragShaderPathname]) {
-        NSLog(@"Failed to compile fragment shader");
-        return NO;
-    }
+    [_program addAttribute:@"position"];
+    [_program addAttribute:@"texCoord"];
     
-    // Attach vertex shader to program.
-    glAttachShader(_program, vertShader);
+    //Link Program
     
-    // Attach fragment shader to program.
-    glAttachShader(_program, fragShader);
+    if (![_program link])
+	{
+		NSString *programLog = [_program programLog];
+		NSLog(@"Program link log: %@", programLog);
+		NSString *fragmentLog = [_program fragmentShaderLog];
+		NSLog(@"Fragment shader compile log: %@", fragmentLog);
+		NSString *vertexLog = [_program vertexShaderLog];
+		NSLog(@"Vertex shader compile log: %@", vertexLog);
+		_program = nil;
+        NSAssert(NO, @"Falied to link HalfSpherical shaders");
+	}
     
-    // Bind attribute locations.
-    // This needs to be done prior to linking.
-    glBindAttribLocation(_program, GLKVertexAttribPosition, "position");
-    glBindAttribLocation(_program, GLKVertexAttribNormal, "normal");
-    glBindAttribLocation(_program, GLKVertexAttribColor, "color");
-    glBindAttribLocation(_program, GLKVertexAttribTexCoord0, "texCoord");
+    _vertexTexCoordAttributeIndex = [_program attributeIndex:@"texCoord"];
     
-    // Link program.
-    if (![self linkProgram:_program]) {
-        NSLog(@"Failed to link program: %d", _program);
-        
-        if (vertShader) {
-            glDeleteShader(vertShader);
-            vertShader = 0;
-        }
-        if (fragShader) {
-            glDeleteShader(fragShader);
-            fragShader = 0;
-        }
-        if (_program) {
-            glDeleteProgram(_program);
-            _program = 0;
-        }
-        
-        return NO;
-    }
-    
-    // Get uniform locations.
-    uniforms[UNIFORM_MODELVIEWPROJECTION_MATRIX] = glGetUniformLocation(_program, "modelViewProjectionMatrix");
-    uniforms[UNIFORM_NORMAL_MATRIX] = glGetUniformLocation(_program, "normalMatrix");
-	uniforms[UNIFORM_Y] = glGetUniformLocation(_program, "SamplerY");
-    uniforms[UNIFORM_UV] = glGetUniformLocation(_program, "SamplerUV");
-    uniforms[UNIFORM_COLOR_CONVERSION_MATRIX] = glGetUniformLocation(_program, "colorConversionMatrix");
-    
-    // Release vertex and fragment shaders.
-    if (vertShader) {
-        glDetachShader(_program, vertShader);
-        glDeleteShader(vertShader);
-    }
-    if (fragShader) {
-        glDetachShader(_program, fragShader);
-        glDeleteShader(fragShader);
-    }
-    
-    return YES;
+    uniforms[UNIFORM_MODELVIEWPROJECTION_MATRIX] = [_program uniformIndex:@"modelViewProjectionMatrix"];
+    uniforms[UNIFORM_Y] = [_program uniformIndex:@"SamplerY"];
+    uniforms[UNIFORM_UV] = [_program uniformIndex:@"SamplerUV"];
+    uniforms[UNIFORM_COLOR_CONVERSION_MATRIX] = [_program uniformIndex:@"colorConversionMatrix"];
 }
 
-- (BOOL)compileShader:(GLuint *)shader type:(GLenum)type file:(NSString *)file
+
+#pragma mark - touches
+- (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event
 {
-    GLint status;
-    const GLchar *source;
-    
-    source = (GLchar *)[[NSString stringWithContentsOfFile:file encoding:NSUTF8StringEncoding error:nil] UTF8String];
-    if (!source) {
-        NSLog(@"Failed to load vertex shader");
-        return NO;
+    for (UITouch *touch in touches) {
+        [_currentTouches addObject:touch];
     }
-    
-    *shader = glCreateShader(type);
-    glShaderSource(*shader, 1, &source, NULL);
-    glCompileShader(*shader);
-    
-#if defined(DEBUG)
-    GLint logLength;
-    glGetShaderiv(*shader, GL_INFO_LOG_LENGTH, &logLength);
-    if (logLength > 0) {
-        GLchar *log = (GLchar *)malloc(logLength);
-        glGetShaderInfoLog(*shader, logLength, &logLength, log);
-        NSLog(@"Shader compile log:\n%s", log);
-        free(log);
-    }
-#endif
-    
-    glGetShaderiv(*shader, GL_COMPILE_STATUS, &status);
-    if (status == 0) {
-        glDeleteShader(*shader);
-        return NO;
-    }
-    
-    return YES;
 }
-
-- (BOOL)linkProgram:(GLuint)prog
+- (void)touchesMoved:(NSSet *)touches withEvent:(UIEvent *)event
 {
-    GLint status;
-    glLinkProgram(prog);
-    
-#if defined(DEBUG)
-    GLint logLength;
-    glGetProgramiv(prog, GL_INFO_LOG_LENGTH, &logLength);
-    if (logLength > 0) {
-        GLchar *log = (GLchar *)malloc(logLength);
-        glGetProgramInfoLog(prog, logLength, &logLength, log);
-        NSLog(@"Program link log:\n%s", log);
-        free(log);
-    }
-#endif
-    
-    glGetProgramiv(prog, GL_LINK_STATUS, &status);
-    if (status == 0) {
-        return NO;
-    }
-    
-    return YES;
+    UITouch *touch = [touches anyObject];
+    float distX = [touch locationInView:touch.view].x -
+    [touch previousLocationInView:touch.view].x;
+    float distY = [touch locationInView:touch.view].y -
+    [touch previousLocationInView:touch.view].y;
+    distX *= -0.005;
+    distY *= -0.005;
+    _rotationX += distY;
+    _rotationY += distX;
 }
-
-- (BOOL)validateProgram:(GLuint)prog
+- (void)touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event
 {
-    GLint logLength, status;
-    
-    glValidateProgram(prog);
-    glGetProgramiv(prog, GL_INFO_LOG_LENGTH, &logLength);
-    if (logLength > 0) {
-        GLchar *log = (GLchar *)malloc(logLength);
-        glGetProgramInfoLog(prog, logLength, &logLength, log);
-        NSLog(@"Program validate log:\n%s", log);
-        free(log);
+    for (UITouch *touch in touches) {
+        [_currentTouches removeObject:touch];
     }
-    
-    glGetProgramiv(prog, GL_VALIDATE_STATUS, &status);
-    if (status == 0) {
-        return NO;
-    }
-    
-    return YES;
 }
-
+- (void)touchesCancelled:(NSSet *)touches withEvent:(UIEvent *)event
+{
+    for (UITouch *touch in touches) {
+        [_currentTouches removeObject:touch];
+    }
+}
 
 @end
