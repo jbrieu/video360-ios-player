@@ -12,39 +12,12 @@
 
 // Color Conversion Constants (YUV to RGB) including adjustment from 16-235/16-240 (video range)
 
-// BT.601, which is the standard for SDTV.
-static const GLfloat kColorConversion601[] = {
-    1.164,  1.164, 1.164,
-    0.0, -0.392, 2.017,
-    1.596, -0.813,   0.0,
-};
-
 // BT.709, which is the standard for HDTV.
 static const GLfloat kColorConversion709[] = {
     1.164,  1.164, 1.164,
     0.0, -0.213, 2.112,
     1.793, -0.533,   0.0,
 };
-
-//typedef struct {
-//    float Position[3];
-//    float Normal[3];
-//    float Color[4];
-//    float TexCoord[2];
-//} Vertex;
-//
-//const Vertex Vertices[] = {
-//    {{1, -1, 0}, {0, 0, 1}, {1, 0, 0, 1}, {1, 1}},
-//    {{1, 1, 0},  {0, 0, 1},{0, 1, 0, 1},{1, 0} },
-//    {{-1, 1, 0},  {0, 0, 1},{0, 0, 1, 1},{0, 0}},
-//    {{-1, -1, 0},  {0, 0, 1},{0, 0, 0, 1},{0, 1}}
-//};
-//
-//
-//const GLubyte Indices[] = {
-//    0, 1, 2,
-//    2, 3, 0
-//};
 
 // Uniform index.
 enum
@@ -56,15 +29,6 @@ enum
     NUM_UNIFORMS
 };
 GLint uniforms[NUM_UNIFORMS];
-
-// Attribute index.
-enum
-{
-    ATTRIB_VERTEX,
-    ATTRIBUT_TEXCOORD,
-    NUM_ATTRIBUTES
-};
-
 
 
 @interface VIDViewController ()
@@ -106,11 +70,6 @@ enum
 - (void)setupGL;
 - (void)tearDownGL;
 - (void)buildProgram;
-
-//- (BOOL)loadShaders;
-//- (BOOL)compileShader:(GLuint *)shader type:(GLenum)type file:(NSString *)file;
-//- (BOOL)linkProgram:(GLuint)prog;
-//- (BOOL)validateProgram:(GLuint)prog;
 
 @end
 
@@ -210,76 +169,27 @@ enum
 {
     [EAGLContext setCurrentContext:self.context];
 
-    [self buildProgram];
+    [self buildProgram];    
     
-    
-    // glUseProgram(_program);
-    
-    
-    
-    //    glGenVertexArraysOES(1, &_vertexArray);
-    //    glBindVertexArrayOES(_vertexArray);
-    //
-    //    // Vertex
-    //    glGenBuffers(1, &_vertexBuffer);
-    //    glBindBuffer(GL_ARRAY_BUFFER, _vertexBuffer);
-    //    glBufferData(GL_ARRAY_BUFFER, sizeof(Vertices), Vertices, GL_STATIC_DRAW);
-    //
-    //    // Index
-    //    glGenBuffers(1, &_indexBuffer);
-    //    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _indexBuffer);
-    //    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(Indices), Indices, GL_STATIC_DRAW);
-    //
-    //    // Position
-    //    glEnableVertexAttribArray(GLKVertexAttribPosition);
-    //    glVertexAttribPointer(GLKVertexAttribPosition, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (const GLvoid *) offsetof(Vertex, Position));
-    //
-    //    // Color
-    //    glEnableVertexAttribArray(GLKVertexAttribColor);
-    //    glVertexAttribPointer(GLKVertexAttribColor, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex), (const GLvoid *) offsetof(Vertex, Color));
-    //
-    //    // Normals
-    //    glEnableVertexAttribArray(GLKVertexAttribNormal);
-    //    glVertexAttribPointer(GLKVertexAttribNormal, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (const GLvoid *) offsetof(Vertex, Normal));
-    // Send the Object's Vertices & Texture Coordinates:
-    
-    // This vertex array will refer to all of the following vertex data. We can restore
-    // the data whenever we want by simply calling glBindVertexArrayOES(_vertexArrayID);
-    // as shown in the glkView:drawInRect: method.
     glGenVertexArraysOES(1, &_vertexArrayID);
     glBindVertexArrayOES(_vertexArrayID);
     
-    //Generate a unique identifier for the buffer.
-    glGenBuffers(1, &_vertexBufferID);
-    //Bind the buffer for subsequent operations.
+    // Vertex
+    glGenBuffers(1, &_vertexBufferID);    
     glBindBuffer(GL_ARRAY_BUFFER, _vertexBufferID);
-    //Send the actual vertex data to the buffer.
     glBufferData(GL_ARRAY_BUFFER,
-                 //Specify number of vertices contained in the vertex array.
                  sizeof(sphere5Verts),
-                 //Specify the array to pull the vertices from.
                  sphere5Verts,
-                 //Tell OpenGL to store vertices statically or dynamically
                  GL_STATIC_DRAW);
-    //Enable use of currently bound buffer.
     glEnableVertexAttribArray(GLKVertexAttribPosition);
-    //Tell OpenGL how to interpret the data.
     glVertexAttribPointer(GLKVertexAttribPosition,
-                          //Each vertex has three components (x,y,z).
                           3,
-                          //Data is of type floating point
                           GL_FLOAT,
-                          //No fixed point scaling - will alwyas be false with ES
                           GL_FALSE,
-                          //Size of each vertex. Contains 3 floats for x,y,z.
                           sizeof(float) * 3,
-                          //Where to start reading each vertex; used for interleaving.
                           NULL);
     
-    //This process is the same as above, but for texture
-    //coordinates instead of position coordinates.
-    //Since our positions & tex coords are not interleaved, we
-    //need to generate a separate buffer object for each.
+    // Texture Coordinates
     glGenBuffers(1, &_vertexTexCoordID);
     glBindBuffer(GL_ARRAY_BUFFER, _vertexTexCoordID);
     glBufferData(GL_ARRAY_BUFFER,
@@ -293,15 +203,7 @@ enum
                           GL_FALSE,
                           sizeof(float) * 2,
                           NULL);
-    // Texture
-    //    glActiveTexture(GL_TEXTURE0);
-    //    glEnableVertexAttribArray(GLKVertexAttribTexCoord0);
-    //    glGenBuffers(1, &_textureBuffer);
-    //    glBindBuffer(GL_ARRAY_BUFFER, _textureBuffer);
-    //    glVertexAttribPointer(GLKVertexAttribTexCoord0, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (const GLvoid *) offsetof(Vertex, TexCoord));
-    //    glBufferData(GL_ARRAY_BUFFER, sizeof(Vertices), Vertices, GL_DYNAMIC_DRAW);
-    
-    // Create CVOpenGLESTextureCacheRef for optimal CVPixelBufferRef to GLES texture conversion.
+   
 	if (!_videoTextureCache) {
 		CVReturn err = CVOpenGLESTextureCacheCreate(kCFAllocatorDefault, NULL, _context, NULL, &_videoTextureCache);
 		if (err != noErr) {
@@ -314,9 +216,7 @@ enum
     glUniform1i(uniforms[UNIFORM_Y], 0);
     glUniform1i(uniforms[UNIFORM_UV], 1);
     glUniformMatrix3fv(uniforms[UNIFORM_COLOR_CONVERSION_MATRIX], 1, GL_FALSE, _preferredConversion);
-    
-    
-    //    glBindVertexArrayOES(0);
+
 }
 
 - (void)tearDownGL
@@ -388,20 +288,7 @@ enum
 		
 		[self cleanUpTextures];
 		
-		
-		/*
-		 Use the color attachment of the pixel buffer to determine the appropriate color conversion matrix.
-		 */
-		CFTypeRef colorAttachments = CVBufferGetAttachment(pixelBuffer, kCVImageBufferYCbCrMatrixKey, NULL);
-		
-		if (colorAttachments == kCVImageBufferYCbCrMatrix_ITU_R_601_4) {
-			_preferredConversion = kColorConversion601;
-		}
-		else {
-			_preferredConversion = kColorConversion709;
-		}
-		
-        
+        // Y-plane
         glActiveTexture(GL_TEXTURE0);
 		err = CVOpenGLESTextureCacheCreateTextureFromImage(kCFAllocatorDefault,
 														   _videoTextureCache,
@@ -448,13 +335,9 @@ enum
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-        
-        
+                
         CFRelease(pixelBuffer);
     }
-    
-    
-    
     
     [_program use];
     
@@ -464,22 +347,14 @@ enum
     glClear(GL_COLOR_BUFFER_BIT);
     
     glUniformMatrix4fv(uniforms[UNIFORM_MODELVIEWPROJECTION_MATRIX], 1, 0, _modelViewProjectionMatrix.m);
-//    glUniformMatrix3fv(uniforms[UNIFORM_COLOR_CONVERSION_MATRIX], 1, GL_FALSE, _preferredConversion);
-//    glUniform1i(uniforms[UNIFORM_Y], 0);
-//    glUniform1i(uniforms[UNIFORM_UV], 1);
-
     
-    
-    glDrawArrays(GL_TRIANGLES, 0, sphere5NumVerts);
-    
+    glDrawArrays(GL_TRIANGLES, 0, sphere5NumVerts);    
 }
 
 #pragma mark - OpenGL Program
-/////////////////////////////
 - (void)buildProgram
 {
     //Create program
-    
     _program = [[GLProgram alloc]
                 initWithVertexShaderFilename:@"Shader"
                 fragmentShaderFilename:@"Shader"];
