@@ -132,7 +132,7 @@ enum
     
     
     
-    //self.preferredFramesPerSecond = 30.0f;
+    self.preferredFramesPerSecond = 60.0f;
     
     // Set the default conversion to BT.709, which is the standard for HDTV.
     _preferredConversion = kColorConversion709;
@@ -310,9 +310,10 @@ enum
 		}
 	}
     
-    //glUniform1i(uniforms[UNIFORM_Y], 0);
-    // glUniform1i(uniforms[UNIFORM_UV], 1);
-    //  glUniformMatrix3fv(uniforms[UNIFORM_COLOR_CONVERSION_MATRIX], 1, GL_FALSE, _preferredConversion);
+    [_program use];
+    glUniform1i(uniforms[UNIFORM_Y], 0);
+    glUniform1i(uniforms[UNIFORM_UV], 1);
+    glUniformMatrix3fv(uniforms[UNIFORM_COLOR_CONVERSION_MATRIX], 1, GL_FALSE, _preferredConversion);
     
     
     //    glBindVertexArrayOES(0);
@@ -463,7 +464,11 @@ enum
     glClear(GL_COLOR_BUFFER_BIT);
     
     glUniformMatrix4fv(uniforms[UNIFORM_MODELVIEWPROJECTION_MATRIX], 1, 0, _modelViewProjectionMatrix.m);
-    glUniformMatrix3fv(uniforms[UNIFORM_COLOR_CONVERSION_MATRIX], 1, GL_FALSE, _preferredConversion);
+//    glUniformMatrix3fv(uniforms[UNIFORM_COLOR_CONVERSION_MATRIX], 1, GL_FALSE, _preferredConversion);
+//    glUniform1i(uniforms[UNIFORM_Y], 0);
+//    glUniform1i(uniforms[UNIFORM_UV], 1);
+
+    
     
     glDrawArrays(GL_TRIANGLES, 0, sphere5NumVerts);
     
