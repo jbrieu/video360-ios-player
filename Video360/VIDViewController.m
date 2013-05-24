@@ -422,7 +422,9 @@ GLint uniforms[NUM_UNIFORMS];
         [_player play];
     }
 }
-
+- (IBAction)playIPhone:(id)sender {
+    [self playPause:sender];
+}
 
 
 - (IBAction)handlePinchGesture:(UIPinchGestureRecognizer *)recognizer
@@ -435,7 +437,11 @@ GLint uniforms[NUM_UNIFORMS];
         _overture = MIN_OVERTURE;
 	
 }
-
+#warning TODO : c'est sale ! faire programatiquement
+#warning TODO créer classe camera
+- (IBAction)handlePinchGestureIPhone:(id)sender {
+    [self handlePinchGesture:sender];
+}
 
 
 
