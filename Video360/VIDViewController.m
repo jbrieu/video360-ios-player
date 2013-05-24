@@ -35,15 +35,7 @@ GLint uniforms[NUM_UNIFORMS];
 {
     
     GLKMatrix4 _modelViewProjectionMatrix;
-    //    GLKMatrix3 _normalMatrix;
-    //    float _rotation;
-    
-    //    GLuint _vertexArray;
-    //
-    //    GLuint _vertexBuffer;
-    //    GLuint _indexBuffer;
-    //    GLuint _textureBuffer;
-    
+
     GLuint _vertexArrayID;
     GLuint _vertexBufferID;
     GLuint _vertexTexCoordID;
@@ -86,10 +78,7 @@ GLint uniforms[NUM_UNIFORMS];
     
     GLKView *view = (GLKView *)self.view;
     view.context = self.context;
-    view.drawableDepthFormat = GLKViewDrawableDepthFormat24;
-    view.drawableMultisample = GLKViewDrawableMultisample4X;
-    
-    
+    view.drawableDepthFormat = GLKViewDrawableDepthFormat24;        
     
     self.preferredFramesPerSecond = 60.0f;
     
@@ -256,12 +245,13 @@ GLint uniforms[NUM_UNIFORMS];
 {
     
     float aspect = fabsf(self.view.bounds.size.width / self.view.bounds.size.height);
-    GLKMatrix4 projectionMatrix = GLKMatrix4MakePerspective(GLKMathDegreesToRadians(65.0f),
+    GLKMatrix4 projectionMatrix = GLKMatrix4MakePerspective(GLKMathDegreesToRadians(85.0f),
                                                             aspect,
                                                             0.1f,
-                                                            100.0f);
+                                                            400.0f);
     
     GLKMatrix4 modelViewMatrix = GLKMatrix4Identity;
+    modelViewMatrix = GLKMatrix4Scale(modelViewMatrix, 300.0, 300.0, 300.0);
     modelViewMatrix = GLKMatrix4Rotate(modelViewMatrix, _rotationX, 1.0f, 0.0f, 0.0f);
     modelViewMatrix = GLKMatrix4Rotate(modelViewMatrix, _rotationY, 0.0f, 1.0f, 0.0f);
     
