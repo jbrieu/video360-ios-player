@@ -7,17 +7,19 @@
         <!--View Controller-->
         <scene sceneID="4">
             <objects>
-                <viewController id="2" customClass="VIDViewController" sceneMemberID="viewController">
+                <viewController storyboardIdentifier="idForGlkViewController" id="2" customClass="VIDViewController" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="5" customClass="GLKView">
-                        <rect key="frame" x="0.0" y="0.0" width="768" height="1024"/>
+                        <rect key="frame" x="0.0" y="0.0" width="1024" height="768"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
                         <gestureRecognizers/>
+                        <simulatedOrientationMetrics key="simulatedOrientationMetrics" orientation="landscapeRight"/>
                         <connections>
                             <outletCollection property="gestureRecognizers" destination="skn-e1-vxP" appends="YES" id="FdJ-BL-EdO"/>
                             <outletCollection property="gestureRecognizers" destination="x0Q-iM-A1U" appends="YES" id="D9d-jQ-F0z"/>
                         </connections>
                     </view>
+                    <simulatedOrientationMetrics key="simulatedOrientationMetrics" orientation="landscapeRight"/>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="3" sceneMemberID="firstResponder"/>
                 <tapGestureRecognizer numberOfTapsRequired="2" id="skn-e1-vxP">
@@ -36,6 +38,12 @@
     <classes>
         <class className="VIDViewController" superclassName="GLKViewController">
             <source key="sourceIdentifier" type="project" relativePath="./Classes/VIDViewController.h"/>
+            <relationships>
+                <relationship kind="action" name="handlePinchGesture:" candidateClass="UIPinchGestureRecognizer"/>
+                <relationship kind="action" name="handlePinchGestureIPhone:"/>
+                <relationship kind="action" name="playIPhone:"/>
+                <relationship kind="action" name="playPause:"/>
+            </relationships>
         </class>
     </classes>
     <simulatedMetricsContainer key="defaultSimulatedMetrics">

@@ -20,8 +20,6 @@
 		012C66BB173A9F700098A148 /* Default.png in Resources */ = {isa = PBXBuildFile; fileRef = 012C66BA173A9F700098A148 /* Default.png */; };
 		012C66BD173A9F700098A148 /* Default@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 012C66BC173A9F700098A148 /* Default@2x.png */; };
 		012C66BF173A9F700098A148 /* Default-568h@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 012C66BE173A9F700098A148 /* Default-568h@2x.png */; };
-		012C66C2173A9F700098A148 /* MainStoryboard_iPhone.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 012C66C0173A9F700098A148 /* MainStoryboard_iPhone.storyboard */; };
-		012C66C5173A9F700098A148 /* MainStoryboard_iPad.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 012C66C3173A9F700098A148 /* MainStoryboard_iPad.storyboard */; };
 		012C66CC173A9F700098A148 /* VIDViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 012C66CB173A9F700098A148 /* VIDViewController.m */; };
 		012C66D4173A9F710098A148 /* SenTestingKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 012C66D3173A9F710098A148 /* SenTestingKit.framework */; };
 		012C66D5173A9F710098A148 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 012C66A4173A9F700098A148 /* UIKit.framework */; };
@@ -36,6 +34,8 @@
 		012C672D174A05260098A148 /* tile_floor.png in Resources */ = {isa = PBXBuildFile; fileRef = 012C672C174A05260098A148 /* tile_floor.png */; };
 		0133018D174ECCCD00E9E487 /* GLProgram.m in Sources */ = {isa = PBXBuildFile; fileRef = 0133018C174ECCCD00E9E487 /* GLProgram.m */; };
 		0133018E174ECCCD00E9E487 /* GLProgram.m in Sources */ = {isa = PBXBuildFile; fileRef = 0133018C174ECCCD00E9E487 /* GLProgram.m */; };
+		017325AC174FF70500DBE011 /* VIDVideoPlayerViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 017325AA174FF70500DBE011 /* VIDVideoPlayerViewController.m */; };
+		017325AD174FF70500DBE011 /* VIDVideoPlayerViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 017325AB174FF70500DBE011 /* VIDVideoPlayerViewController.xib */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -64,10 +64,8 @@
 		012C66BA173A9F700098A148 /* Default.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Default.png; sourceTree = "<group>"; };
 		012C66BC173A9F700098A148 /* Default@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Default@2x.png"; sourceTree = "<group>"; };
 		012C66BE173A9F700098A148 /* Default-568h@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Default-568h@2x.png"; sourceTree = "<group>"; };
-		012C66C1173A9F700098A148 /* en */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = en; path = en.lproj/MainStoryboard_iPhone.storyboard; sourceTree = "<group>"; };
-		012C66C4173A9F700098A148 /* en */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = en; path = en.lproj/MainStoryboard_iPad.storyboard; sourceTree = "<group>"; };
-		012C66CA173A9F700098A148 /* VIDViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = VIDViewController.h; sourceTree = "<group>"; };
-		012C66CB173A9F700098A148 /* VIDViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = VIDViewController.m; sourceTree = "<group>"; };
+		012C66CA173A9F700098A148 /* VIDViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = VIDViewController.h; path = ../VIDViewController.h; sourceTree = "<group>"; };
+		012C66CB173A9F700098A148 /* VIDViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; name = VIDViewController.m; path = ../VIDViewController.m; sourceTree = "<group>"; };
 		012C66D2173A9F710098A148 /* Video360Tests.octest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = Video360Tests.octest; sourceTree = BUILT_PRODUCTS_DIR; };
 		012C66D3173A9F710098A148 /* SenTestingKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SenTestingKit.framework; path = Library/Frameworks/SenTestingKit.framework; sourceTree = DEVELOPER_DIR; };
 		012C66DB173A9F710098A148 /* Video360Tests-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "Video360Tests-Info.plist"; sourceTree = "<group>"; };
@@ -83,8 +81,11 @@
 		012C6765174A08CA0098A148 /* Shader.fsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = Shader.fsh; sourceTree = "<group>"; };
 		012C6766174A08CA0098A148 /* Shader.vsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = Shader.vsh; sourceTree = "<group>"; };
 		0133018A174ECA4200E9E487 /* sphere5.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = sphere5.h; sourceTree = "<group>"; };
-		0133018B174ECCCD00E9E487 /* GLProgram.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GLProgram.h; sourceTree = "<group>"; };
-		0133018C174ECCCD00E9E487 /* GLProgram.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GLProgram.m; sourceTree = "<group>"; };
+		0133018B174ECCCD00E9E487 /* GLProgram.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = GLProgram.h; path = ../GLProgram.h; sourceTree = "<group>"; };
+		0133018C174ECCCD00E9E487 /* GLProgram.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = GLProgram.m; path = ../GLProgram.m; sourceTree = "<group>"; };
+		017325A9174FF70500DBE011 /* VIDVideoPlayerViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = VIDVideoPlayerViewController.h; sourceTree = "<group>"; };
+		017325AA174FF70500DBE011 /* VIDVideoPlayerViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = VIDVideoPlayerViewController.m; sourceTree = "<group>"; };
+		017325AB174FF70500DBE011 /* VIDVideoPlayerViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = VIDVideoPlayerViewController.xib; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -156,14 +157,9 @@
 		012C66AE173A9F700098A148 /* Video360 */ = {
 			isa = PBXGroup;
 			children = (
+				017325A8174FF70500DBE011 /* VideoPlayer */,
 				012C66B7173A9F700098A148 /* VIDAppDelegate.h */,
 				012C66B8173A9F700098A148 /* VIDAppDelegate.m */,
-				0133018B174ECCCD00E9E487 /* GLProgram.h */,
-				0133018C174ECCCD00E9E487 /* GLProgram.m */,
-				012C66C0173A9F700098A148 /* MainStoryboard_iPhone.storyboard */,
-				012C66C3173A9F700098A148 /* MainStoryboard_iPad.storyboard */,
-				012C66CA173A9F700098A148 /* VIDViewController.h */,
-				012C66CB173A9F700098A148 /* VIDViewController.m */,
 				012C66EC17404F590098A148 /* Resources */,
 				012C66AF173A9F700098A148 /* Supporting Files */,
 			);
@@ -213,6 +209,28 @@
 				012C66ED17404F590098A148 /* demo.mp4 */,
 			);
 			path = Resources;
+			sourceTree = "<group>";
+		};
+		017325A8174FF70500DBE011 /* VideoPlayer */ = {
+			isa = PBXGroup;
+			children = (
+				017325AE174FF97400DBE011 /* OpenGL */,
+				017325A9174FF70500DBE011 /* VIDVideoPlayerViewController.h */,
+				017325AA174FF70500DBE011 /* VIDVideoPlayerViewController.m */,
+				017325AB174FF70500DBE011 /* VIDVideoPlayerViewController.xib */,
+			);
+			path = VideoPlayer;
+			sourceTree = "<group>";
+		};
+		017325AE174FF97400DBE011 /* OpenGL */ = {
+			isa = PBXGroup;
+			children = (
+				0133018B174ECCCD00E9E487 /* GLProgram.h */,
+				0133018C174ECCCD00E9E487 /* GLProgram.m */,
+				012C66CA173A9F700098A148 /* VIDViewController.h */,
+				012C66CB173A9F700098A148 /* VIDViewController.m */,
+			);
+			name = OpenGL;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -293,10 +311,9 @@
 				012C66BB173A9F700098A148 /* Default.png in Resources */,
 				012C66BD173A9F700098A148 /* Default@2x.png in Resources */,
 				012C66BF173A9F700098A148 /* Default-568h@2x.png in Resources */,
-				012C66C2173A9F700098A148 /* MainStoryboard_iPhone.storyboard in Resources */,
-				012C66C5173A9F700098A148 /* MainStoryboard_iPad.storyboard in Resources */,
 				012C66EE17404F590098A148 /* demo.mp4 in Resources */,
 				012C672D174A05260098A148 /* tile_floor.png in Resources */,
+				017325AD174FF70500DBE011 /* VIDVideoPlayerViewController.xib in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -335,6 +352,7 @@
 				012C66B9173A9F700098A148 /* VIDAppDelegate.m in Sources */,
 				012C66CC173A9F700098A148 /* VIDViewController.m in Sources */,
 				0133018D174ECCCD00E9E487 /* GLProgram.m in Sources */,
+				017325AC174FF70500DBE011 /* VIDVideoPlayerViewController.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -364,22 +382,6 @@
 				012C66B2173A9F700098A148 /* en */,
 			);
 			name = InfoPlist.strings;
-			sourceTree = "<group>";
-		};
-		012C66C0173A9F700098A148 /* MainStoryboard_iPhone.storyboard */ = {
-			isa = PBXVariantGroup;
-			children = (
-				012C66C1173A9F700098A148 /* en */,
-			);
-			name = MainStoryboard_iPhone.storyboard;
-			sourceTree = "<group>";
-		};
-		012C66C3173A9F700098A148 /* MainStoryboard_iPad.storyboard */ = {
-			isa = PBXVariantGroup;
-			children = (
-				012C66C4173A9F700098A148 /* en */,
-			);
-			name = MainStoryboard_iPad.storyboard;
 			sourceTree = "<group>";
 		};
 		012C66DC173A9F710098A148 /* InfoPlist.strings */ = {
