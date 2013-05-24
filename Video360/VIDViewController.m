@@ -10,6 +10,11 @@
 #import "sphere5.h"
 #import "GLProgram.h"
 
+
+#define MAX_OVERTURE 95.0
+#define MIN_OVERTURE 25.0
+#define DEFAULT_OVERTURE 85.0
+
 // Color Conversion Constants (YUV to RGB) including adjustment from 16-235/16-240 (video range)
 
 // BT.709, which is the standard for HDTV.
@@ -35,7 +40,7 @@ GLint uniforms[NUM_UNIFORMS];
 {
     
     GLKMatrix4 _modelViewProjectionMatrix;
-
+    
     GLuint _vertexArrayID;
     GLuint _vertexBufferID;
     GLuint _vertexTexCoordID;
@@ -43,7 +48,7 @@ GLint uniforms[NUM_UNIFORMS];
     
     float _rotationX;
     float _rotationY;
-    
+    CGFloat _overture;
     
     AVPlayerItemVideoOutput* _videoOutput;
     AVPlayer* _player;
@@ -78,9 +83,11 @@ GLint uniforms[NUM_UNIFORMS];
     
     GLKView *view = (GLKView *)self.view;
     view.context = self.context;
-    view.drawableDepthFormat = GLKViewDrawableDepthFormat24;        
+    view.drawableDepthFormat = GLKViewDrawableDepthFormat24;
     
     self.preferredFramesPerSecond = 60.0f;
+    
+    _overture = DEFAULT_OVERTURE;
     
     // Set the default conversion to BT.709, which is the standard for HDTV.
     _preferredConversion = kColorConversion709;
@@ -157,14 +164,14 @@ GLint uniforms[NUM_UNIFORMS];
 - (void)setupGL
 {
     [EAGLContext setCurrentContext:self.context];
-
-    [self buildProgram];    
+    
+    [self buildProgram];
     
     glGenVertexArraysOES(1, &_vertexArrayID);
     glBindVertexArrayOES(_vertexArrayID);
     
     // Vertex
-    glGenBuffers(1, &_vertexBufferID);    
+    glGenBuffers(1, &_vertexBufferID);
     glBindBuffer(GL_ARRAY_BUFFER, _vertexBufferID);
     glBufferData(GL_ARRAY_BUFFER,
                  sizeof(sphere5Verts),
@@ -192,7 +199,7 @@ GLint uniforms[NUM_UNIFORMS];
                           GL_FALSE,
                           sizeof(float) * 2,
                           NULL);
-   
+    
 	if (!_videoTextureCache) {
 		CVReturn err = CVOpenGLESTextureCacheCreate(kCFAllocatorDefault, NULL, _context, NULL, &_videoTextureCache);
 		if (err != noErr) {
@@ -205,7 +212,7 @@ GLint uniforms[NUM_UNIFORMS];
     glUniform1i(uniforms[UNIFORM_Y], 0);
     glUniform1i(uniforms[UNIFORM_UV], 1);
     glUniformMatrix3fv(uniforms[UNIFORM_COLOR_CONVERSION_MATRIX], 1, GL_FALSE, _preferredConversion);
-
+    
 }
 
 - (void)tearDownGL
@@ -245,7 +252,7 @@ GLint uniforms[NUM_UNIFORMS];
 {
     
     float aspect = fabsf(self.view.bounds.size.width / self.view.bounds.size.height);
-    GLKMatrix4 projectionMatrix = GLKMatrix4MakePerspective(GLKMathDegreesToRadians(85.0f),
+    GLKMatrix4 projectionMatrix = GLKMatrix4MakePerspective(GLKMathDegreesToRadians(_overture),
                                                             aspect,
                                                             0.1f,
                                                             400.0f);
@@ -325,7 +332,7 @@ GLint uniforms[NUM_UNIFORMS];
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-                
+        
         CFRelease(pixelBuffer);
     }
     
@@ -338,7 +345,7 @@ GLint uniforms[NUM_UNIFORMS];
     
     glUniformMatrix4fv(uniforms[UNIFORM_MODELVIEWPROJECTION_MATRIX], 1, 0, _modelViewProjectionMatrix.m);
     
-    glDrawArrays(GL_TRIANGLES, 0, sphere5NumVerts);    
+    glDrawArrays(GL_TRIANGLES, 0, sphere5NumVerts);
 }
 
 #pragma mark - OpenGL Program
@@ -393,8 +400,8 @@ GLint uniforms[NUM_UNIFORMS];
     [touch previousLocationInView:touch.view].y;
     distX *= -0.005;
     distY *= -0.005;
-    _rotationX += distY;
-    _rotationY += distX;
+    _rotationX += distY *  _overture / 100;
+    _rotationY += distX *  _overture / 100;
 }
 - (void)touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event
 {
@@ -413,7 +420,23 @@ GLint uniforms[NUM_UNIFORMS];
         [_player pause];
     } else {
         [_player play];
-    }    
+    }
 }
+
+
+
+- (IBAction)handlePinchGesture:(UIPinchGestureRecognizer *)recognizer
+{    
+    _overture /= recognizer.scale;
+
+    if (_overture > MAX_OVERTURE)
+        _overture = MAX_OVERTURE;
+    if(_overture<MIN_OVERTURE)
+        _overture = MIN_OVERTURE;
+	
+}
+
+
+
 
 @end

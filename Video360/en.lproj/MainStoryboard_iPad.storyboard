@@ -15,6 +15,7 @@
                         <gestureRecognizers/>
                         <connections>
                             <outletCollection property="gestureRecognizers" destination="skn-e1-vxP" appends="YES" id="FdJ-BL-EdO"/>
+                            <outletCollection property="gestureRecognizers" destination="x0Q-iM-A1U" appends="YES" id="D9d-jQ-F0z"/>
                         </connections>
                     </view>
                 </viewController>
@@ -24,6 +25,11 @@
                         <action selector="playPause:" destination="2" id="eC8-wm-jLD"/>
                     </connections>
                 </tapGestureRecognizer>
+                <pinchGestureRecognizer id="x0Q-iM-A1U">
+                    <connections>
+                        <action selector="handlePinchGesture:" destination="2" id="LfZ-K8-FsV"/>
+                    </connections>
+                </pinchGestureRecognizer>
             </objects>
         </scene>
     </scenes>
