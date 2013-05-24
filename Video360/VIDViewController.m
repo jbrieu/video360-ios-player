@@ -408,5 +408,12 @@ GLint uniforms[NUM_UNIFORMS];
         [_currentTouches removeObject:touch];
     }
 }
+- (IBAction)playPause:(id)sender {
+    if (_player.rate == 1.0) {
+        [_player pause];
+    } else {
+        [_player play];
+    }    
+}
 
 @end
