@@ -11,6 +11,9 @@
 
 #define ONE_FRAME_DURATION 0.03
 
+#define HIDE_CONTROL_DELAY 5.0f
+#define DEFAULT_VIEW_ALPHA 0.6f
+
 
 static void *AVPlayerItemStatusContext = &AVPlayerItemStatusContext;
 
@@ -25,7 +28,7 @@ static void *AVPlayerItemStatusContext = &AVPlayerItemStatusContext;
     id _timeObserver;
     
     BOOL _playing;
-
+    
 }
 @property (strong, nonatomic) IBOutlet UIView *playerControlBackgroundView;
 @property (strong, nonatomic) IBOutlet UIButton *playButton;
@@ -53,9 +56,9 @@ static void *AVPlayerItemStatusContext = &AVPlayerItemStatusContext;
     [self configureControleBackgroundView];
     
     [self setupVideoPlayback];
- 
+    
     [self configureGLKView];
-        
+    
 }
 
 
@@ -105,13 +108,13 @@ static void *AVPlayerItemStatusContext = &AVPlayerItemStatusContext;
         AVKeyValueStatus status = [asset statusOfValueForKey:@"tracks" error:&error];
         if (status == AVKeyValueStatusLoaded)
         {
-            _playerItem = [AVPlayerItem playerItemWithAsset:asset];            
+            _playerItem = [AVPlayerItem playerItemWithAsset:asset];
             
             dispatch_async(dispatch_get_main_queue(), ^{
                 [_playerItem addOutput:_videoOutput];
                 [_player replaceCurrentItemWithPlayerItem:_playerItem];
                 [_videoOutput requestNotificationOfMediaDataChangeWithAdvanceInterval:ONE_FRAME_DURATION];
-
+                
             });
         }
         else
@@ -144,12 +147,13 @@ static void *AVPlayerItemStatusContext = &AVPlayerItemStatusContext;
     _playButton.frame = CGRectMake(_playerControlBackgroundView.bounds.size.width * 0.5 - 20, 10, 40, 40);
     _playButton.backgroundColor = [UIColor clearColor];
     _playButton.showsTouchWhenHighlighted = YES;
-
+    
     _playing = NO;
     [self updatePlayButton];
 }
 
 - (IBAction)playButtonTouched:(id)sender {
+    [NSObject cancelPreviousPerformRequestsWithTarget:self];
     if(_playing){
         [self pause];
     }else{
@@ -159,7 +163,7 @@ static void *AVPlayerItemStatusContext = &AVPlayerItemStatusContext;
 
 - (void) updatePlayButton
 {
-
+    
     [_playButton setImage:[UIImage imageNamed:_playing ? @"playback_pause" : @"playback_play"]
                  forState:UIControlStateNormal];
 }
@@ -172,6 +176,8 @@ static void *AVPlayerItemStatusContext = &AVPlayerItemStatusContext;
     _playing = YES;
     [self updatePlayButton];
     [_player play];
+    
+    [self scheduleHideControls];
 }
 
 - (void) pause
@@ -182,6 +188,8 @@ static void *AVPlayerItemStatusContext = &AVPlayerItemStatusContext;
     _playing = NO;
     [self updatePlayButton];
     [_player pause];
+    
+    [self scheduleHideControls];
 }
 
 #pragma mark progress slider management
@@ -191,8 +199,77 @@ static void *AVPlayerItemStatusContext = &AVPlayerItemStatusContext;
     _progressSlider.autoresizingMask = UIViewAutoresizingFlexibleWidth;
     _progressSlider.continuous = NO;
     _progressSlider.value = 0;
-
+    
 }
+
+#pragma mark controls management
+-(void)configureControleBackgroundView
+{
+    CGFloat parentWidth = self.view.bounds.size.width;
+    CGFloat parentHeight = self.view.bounds.size.height;
+    
+    CGFloat width  = parentWidth /3 ;
+    CGFloat height = parentHeight / 8;
+    
+    CGFloat x = parentWidth / 2 - width / 2 ;
+    CGFloat y = parentHeight - height ;
+    
+    _playerControlBackgroundView.frame = CGRectMake(x, y, width, height);
+}
+
+-(void) toggleControls
+{
+    if(_playerControlBackgroundView.hidden){
+        [self showControls];
+    }else{
+        [self hideControls];
+    }
+    
+    
+    
+    [self scheduleHideControls];
+}
+
+-(void) scheduleHideControls
+{
+    if(!_playerControlBackgroundView.hidden)
+    {
+        [NSObject cancelPreviousPerformRequestsWithTarget:self];
+        [self performSelector:@selector(hideControls) withObject:nil afterDelay:HIDE_CONTROL_DELAY];
+    }
+}
+
+-(void) hideControls
+{
+    
+    _playerControlBackgroundView.alpha = DEFAULT_VIEW_ALPHA;
+    [UIView animateWithDuration:0.5
+                          delay:0.0
+                        options:UIViewAnimationOptionCurveEaseIn
+                     animations:^(void) {
+                         
+                         _playerControlBackgroundView.alpha = 0.0f;
+                     }
+                     completion:^(BOOL finished){
+                         if(finished)
+                             _playerControlBackgroundView.hidden = YES;
+                     }];
+}
+
+-(void) showControls
+{
+    _playerControlBackgroundView.alpha = 0.0;
+    _playerControlBackgroundView.hidden = NO;
+    [UIView animateWithDuration:0.5
+                          delay:0.0
+                        options:UIViewAnimationOptionCurveEaseIn
+                     animations:^(void) {
+                         
+                         _playerControlBackgroundView.alpha = DEFAULT_VIEW_ALPHA;
+                     }
+                     completion:nil];
+}
+
 
 
 #pragma mark video observing
@@ -247,10 +324,10 @@ static void *AVPlayerItemStatusContext = &AVPlayerItemStatusContext;
 	int minutes = secondsInt/60;
 	secondsInt -= minutes*60;
 	
-//	self.currentTime.textColor = [UIColor colorWithWhite:1.0 alpha:1.0];
-//	self.currentTime.textAlignment = NSTextAlignmentCenter;
-//    
-//	self.currentTime.text = [NSString stringWithFormat:@"%.2i:%.2i", minutes, secondsInt];
+    //	self.currentTime.textColor = [UIColor colorWithWhite:1.0 alpha:1.0];
+    //	self.currentTime.textAlignment = NSTextAlignmentCenter;
+    //
+    //	self.currentTime.text = [NSString stringWithFormat:@"%.2i:%.2i", minutes, secondsInt];
 }
 
 - (void)addTimeObserverToPlayer
@@ -280,25 +357,6 @@ static void *AVPlayerItemStatusContext = &AVPlayerItemStatusContext;
 }
 
 
-#pragma mark controls management
--(void)configureControleBackgroundView
-{
-    CGFloat parentWidth = self.view.bounds.size.width;
-    CGFloat parentHeight = self.view.bounds.size.height;
-    
-    CGFloat width  = parentWidth /3 ;
-    CGFloat height = parentHeight / 8;
-    
-    CGFloat x = parentWidth / 2 - width / 2 ;
-    CGFloat y = parentHeight - height ;
-    
-    _playerControlBackgroundView.frame = CGRectMake(x, y, width, height);
-}
-
--(void) toggleControls
-{
-    _playerControlBackgroundView.hidden = !_playerControlBackgroundView.hidden;
-}
 
 
 @end
