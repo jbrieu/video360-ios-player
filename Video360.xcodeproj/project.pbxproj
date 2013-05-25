@@ -20,7 +20,7 @@
 		012C66BB173A9F700098A148 /* Default.png in Resources */ = {isa = PBXBuildFile; fileRef = 012C66BA173A9F700098A148 /* Default.png */; };
 		012C66BD173A9F700098A148 /* Default@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 012C66BC173A9F700098A148 /* Default@2x.png */; };
 		012C66BF173A9F700098A148 /* Default-568h@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 012C66BE173A9F700098A148 /* Default-568h@2x.png */; };
-		012C66CC173A9F700098A148 /* VIDViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 012C66CB173A9F700098A148 /* VIDViewController.m */; };
+		012C66CC173A9F700098A148 /* VIDGlkViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 012C66CB173A9F700098A148 /* VIDGlkViewController.m */; };
 		012C66D4173A9F710098A148 /* SenTestingKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 012C66D3173A9F710098A148 /* SenTestingKit.framework */; };
 		012C66D5173A9F710098A148 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 012C66A4173A9F700098A148 /* UIKit.framework */; };
 		012C66D6173A9F710098A148 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 012C66A6173A9F700098A148 /* Foundation.framework */; };
@@ -67,8 +67,8 @@
 		012C66BA173A9F700098A148 /* Default.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Default.png; sourceTree = "<group>"; };
 		012C66BC173A9F700098A148 /* Default@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Default@2x.png"; sourceTree = "<group>"; };
 		012C66BE173A9F700098A148 /* Default-568h@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Default-568h@2x.png"; sourceTree = "<group>"; };
-		012C66CA173A9F700098A148 /* VIDViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = VIDViewController.h; path = ../VIDViewController.h; sourceTree = "<group>"; };
-		012C66CB173A9F700098A148 /* VIDViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; name = VIDViewController.m; path = ../VIDViewController.m; sourceTree = "<group>"; };
+		012C66CA173A9F700098A148 /* VIDGlkViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = VIDGlkViewController.h; path = OpenGL/VIDGlkViewController.h; sourceTree = "<group>"; };
+		012C66CB173A9F700098A148 /* VIDGlkViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; name = VIDGlkViewController.m; path = OpenGL/VIDGlkViewController.m; sourceTree = "<group>"; };
 		012C66D2173A9F710098A148 /* Video360Tests.octest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = Video360Tests.octest; sourceTree = BUILT_PRODUCTS_DIR; };
 		012C66D3173A9F710098A148 /* SenTestingKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SenTestingKit.framework; path = Library/Frameworks/SenTestingKit.framework; sourceTree = DEVELOPER_DIR; };
 		012C66DB173A9F710098A148 /* Video360Tests-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "Video360Tests-Info.plist"; sourceTree = "<group>"; };
@@ -236,8 +236,8 @@
 			children = (
 				0133018B174ECCCD00E9E487 /* GLProgram.h */,
 				0133018C174ECCCD00E9E487 /* GLProgram.m */,
-				012C66CA173A9F700098A148 /* VIDViewController.h */,
-				012C66CB173A9F700098A148 /* VIDViewController.m */,
+				012C66CA173A9F700098A148 /* VIDGlkViewController.h */,
+				012C66CB173A9F700098A148 /* VIDGlkViewController.m */,
 			);
 			name = OpenGL;
 			sourceTree = "<group>";
@@ -362,7 +362,7 @@
 			files = (
 				012C66B5173A9F700098A148 /* main.m in Sources */,
 				012C66B9173A9F700098A148 /* VIDAppDelegate.m in Sources */,
-				012C66CC173A9F700098A148 /* VIDViewController.m in Sources */,
+				012C66CC173A9F700098A148 /* VIDGlkViewController.m in Sources */,
 				0133018D174ECCCD00E9E487 /* GLProgram.m in Sources */,
 				017325AC174FF70500DBE011 /* VIDVideoPlayerViewController.m in Sources */,
 			);

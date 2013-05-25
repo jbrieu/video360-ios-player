@@ -7,7 +7,7 @@
 //
 
 #import "VIDVideoPlayerViewController.h"
-#import "VIDViewController.h"
+#import "VIDGlkViewController.h"
 
 #define ONE_FRAME_DURATION 0.03
 
@@ -19,7 +19,7 @@ static void *AVPlayerItemStatusContext = &AVPlayerItemStatusContext;
 
 @interface VIDVideoPlayerViewController ()
 {
-    VIDViewController *_glkViewController;
+    VIDGlkViewController *_glkViewController;
     AVPlayerItemVideoOutput* _videoOutput;
     AVPlayer* _player;
     AVPlayerItem* _playerItem;
@@ -127,7 +127,7 @@ static void *AVPlayerItemStatusContext = &AVPlayerItemStatusContext;
 #pragma mark rendering glk view management
 -(void)configureGLKView
 {
-    _glkViewController = [[VIDViewController alloc] init];
+    _glkViewController = [[VIDGlkViewController alloc] init];
     
     _glkViewController.videoPlayerController = self;
     
@@ -220,12 +220,11 @@ static void *AVPlayerItemStatusContext = &AVPlayerItemStatusContext;
 -(void) toggleControls
 {
     if(_playerControlBackgroundView.hidden){
-        [self showControls];
+        [self showControlsFast];
     }else{
-        [self hideControls];
+        [self hideControlsFast];
     }
-    
-    
+        
     
     [self scheduleHideControls];
 }
@@ -235,15 +234,14 @@ static void *AVPlayerItemStatusContext = &AVPlayerItemStatusContext;
     if(!_playerControlBackgroundView.hidden)
     {
         [NSObject cancelPreviousPerformRequestsWithTarget:self];
-        [self performSelector:@selector(hideControls) withObject:nil afterDelay:HIDE_CONTROL_DELAY];
+        [self performSelector:@selector(hideControlsSlowly) withObject:nil afterDelay:HIDE_CONTROL_DELAY];
     }
 }
 
--(void) hideControls
+-(void) hideControlsWithDuration:(NSTimeInterval)duration
 {
-    
     _playerControlBackgroundView.alpha = DEFAULT_VIEW_ALPHA;
-    [UIView animateWithDuration:0.5
+    [UIView animateWithDuration:duration
                           delay:0.0
                         options:UIViewAnimationOptionCurveEaseIn
                      animations:^(void) {
@@ -254,13 +252,24 @@ static void *AVPlayerItemStatusContext = &AVPlayerItemStatusContext;
                          if(finished)
                              _playerControlBackgroundView.hidden = YES;
                      }];
+
 }
 
--(void) showControls
+-(void) hideControlsFast
+{
+    [self hideControlsWithDuration:0.2];
+}
+
+-(void) hideControlsSlowly
+{
+    [self hideControlsWithDuration:1.0];
+}
+
+-(void) showControlsFast
 {
     _playerControlBackgroundView.alpha = 0.0;
     _playerControlBackgroundView.hidden = NO;
-    [UIView animateWithDuration:0.5
+    [UIView animateWithDuration:0.2
                           delay:0.0
                         options:UIViewAnimationOptionCurveEaseIn
                      animations:^(void) {
@@ -290,7 +299,7 @@ static void *AVPlayerItemStatusContext = &AVPlayerItemStatusContext;
 			case AVPlayerItemStatusUnknown:
 				break;
 			case AVPlayerItemStatusReadyToPlay:
-                // TODO Show button
+//                [self showControlsFast];
 				break;
 			case AVPlayerItemStatusFailed:
 				[self stopLoadingAnimationAndHandleError:[[_player currentItem] error]];
