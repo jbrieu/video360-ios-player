@@ -31,11 +31,14 @@
 		012C66F1174050B10098A148 /* MobileCoreServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 012C66EF174050810098A148 /* MobileCoreServices.framework */; };
 		012C66F3174050B70098A148 /* CoreVideo.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 012C66F2174050B70098A148 /* CoreVideo.framework */; };
 		012C66F5174050BC0098A148 /* CoreMedia.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 012C66F4174050BC0098A148 /* CoreMedia.framework */; };
-		012C672D174A05260098A148 /* tile_floor.png in Resources */ = {isa = PBXBuildFile; fileRef = 012C672C174A05260098A148 /* tile_floor.png */; };
 		0133018D174ECCCD00E9E487 /* GLProgram.m in Sources */ = {isa = PBXBuildFile; fileRef = 0133018C174ECCCD00E9E487 /* GLProgram.m */; };
 		0133018E174ECCCD00E9E487 /* GLProgram.m in Sources */ = {isa = PBXBuildFile; fileRef = 0133018C174ECCCD00E9E487 /* GLProgram.m */; };
 		017325AC174FF70500DBE011 /* VIDVideoPlayerViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 017325AA174FF70500DBE011 /* VIDVideoPlayerViewController.m */; };
 		017325AD174FF70500DBE011 /* VIDVideoPlayerViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 017325AB174FF70500DBE011 /* VIDVideoPlayerViewController.xib */; };
+		017325B317509CC600DBE011 /* playback_pause.png in Resources */ = {isa = PBXBuildFile; fileRef = 017325AF17509CC600DBE011 /* playback_pause.png */; };
+		017325B417509CC600DBE011 /* playback_pause@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 017325B017509CC600DBE011 /* playback_pause@2x.png */; };
+		017325B517509CC600DBE011 /* playback_play.png in Resources */ = {isa = PBXBuildFile; fileRef = 017325B117509CC600DBE011 /* playback_play.png */; };
+		017325B617509CC600DBE011 /* playback_play@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 017325B217509CC600DBE011 /* playback_play@2x.png */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -77,7 +80,6 @@
 		012C66EF174050810098A148 /* MobileCoreServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MobileCoreServices.framework; path = System/Library/Frameworks/MobileCoreServices.framework; sourceTree = SDKROOT; };
 		012C66F2174050B70098A148 /* CoreVideo.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreVideo.framework; path = System/Library/Frameworks/CoreVideo.framework; sourceTree = SDKROOT; };
 		012C66F4174050BC0098A148 /* CoreMedia.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreMedia.framework; path = System/Library/Frameworks/CoreMedia.framework; sourceTree = SDKROOT; };
-		012C672C174A05260098A148 /* tile_floor.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = tile_floor.png; sourceTree = "<group>"; };
 		012C6765174A08CA0098A148 /* Shader.fsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = Shader.fsh; sourceTree = "<group>"; };
 		012C6766174A08CA0098A148 /* Shader.vsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = Shader.vsh; sourceTree = "<group>"; };
 		0133018A174ECA4200E9E487 /* sphere5.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = sphere5.h; sourceTree = "<group>"; };
@@ -86,6 +88,10 @@
 		017325A9174FF70500DBE011 /* VIDVideoPlayerViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = VIDVideoPlayerViewController.h; sourceTree = "<group>"; };
 		017325AA174FF70500DBE011 /* VIDVideoPlayerViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = VIDVideoPlayerViewController.m; sourceTree = "<group>"; };
 		017325AB174FF70500DBE011 /* VIDVideoPlayerViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = VIDVideoPlayerViewController.xib; sourceTree = "<group>"; };
+		017325AF17509CC600DBE011 /* playback_pause.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = playback_pause.png; sourceTree = "<group>"; };
+		017325B017509CC600DBE011 /* playback_pause@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "playback_pause@2x.png"; sourceTree = "<group>"; };
+		017325B117509CC600DBE011 /* playback_play.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = playback_play.png; sourceTree = "<group>"; };
+		017325B217509CC600DBE011 /* playback_play@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "playback_play@2x.png"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -202,10 +208,13 @@
 		012C66EC17404F590098A148 /* Resources */ = {
 			isa = PBXGroup;
 			children = (
+				017325AF17509CC600DBE011 /* playback_pause.png */,
+				017325B017509CC600DBE011 /* playback_pause@2x.png */,
+				017325B117509CC600DBE011 /* playback_play.png */,
+				017325B217509CC600DBE011 /* playback_play@2x.png */,
 				012C6766174A08CA0098A148 /* Shader.vsh */,
 				012C6765174A08CA0098A148 /* Shader.fsh */,
 				0133018A174ECA4200E9E487 /* sphere5.h */,
-				012C672C174A05260098A148 /* tile_floor.png */,
 				012C66ED17404F590098A148 /* demo.mp4 */,
 			);
 			path = Resources;
@@ -312,8 +321,11 @@
 				012C66BD173A9F700098A148 /* Default@2x.png in Resources */,
 				012C66BF173A9F700098A148 /* Default-568h@2x.png in Resources */,
 				012C66EE17404F590098A148 /* demo.mp4 in Resources */,
-				012C672D174A05260098A148 /* tile_floor.png in Resources */,
 				017325AD174FF70500DBE011 /* VIDVideoPlayerViewController.xib in Resources */,
+				017325B317509CC600DBE011 /* playback_pause.png in Resources */,
+				017325B417509CC600DBE011 /* playback_pause@2x.png in Resources */,
+				017325B517509CC600DBE011 /* playback_play.png in Resources */,
+				017325B617509CC600DBE011 /* playback_play@2x.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
