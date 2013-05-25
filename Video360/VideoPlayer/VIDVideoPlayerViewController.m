@@ -14,6 +14,12 @@
 #define HIDE_CONTROL_DELAY 5.0f
 #define DEFAULT_VIEW_ALPHA 0.6f
 
+/* AVPlayer keys */
+NSString * const kRateKey			= @"rate";
+NSString * const kCurrentItemKey	= @"currentItem";
+
+static void *AVPlayerDemoPlaybackViewControllerRateObservationContext = &AVPlayerDemoPlaybackViewControllerRateObservationContext;
+static void *AVPlayerDemoPlaybackViewControllerCurrentItemObservationContext = &AVPlayerDemoPlaybackViewControllerCurrentItemObservationContext;
 
 static void *AVPlayerItemStatusContext = &AVPlayerItemStatusContext;
 
@@ -27,7 +33,9 @@ static void *AVPlayerItemStatusContext = &AVPlayerItemStatusContext;
 	id _notificationToken;
     id _timeObserver;
     
-    BOOL _playing;
+    float mRestoreAfterScrubbingRate;
+	BOOL seekToZeroBeforePlay;
+    
     
 }
 @property (strong, nonatomic) IBOutlet UIView *playerControlBackgroundView;
@@ -115,6 +123,28 @@ static void *AVPlayerItemStatusContext = &AVPlayerItemStatusContext;
                 [_player replaceCurrentItemWithPlayerItem:_playerItem];
                 [_videoOutput requestNotificationOfMediaDataChangeWithAdvanceInterval:ONE_FRAME_DURATION];
                 
+                /* When the player item has played to its end time we'll toggle
+                 the movie controller Pause button to be the Play button */
+                [[NSNotificationCenter defaultCenter] addObserver:self
+                                                         selector:@selector(playerItemDidReachEnd:)
+                                                             name:AVPlayerItemDidPlayToEndTimeNotification
+                                                           object:_playerItem];
+                
+                seekToZeroBeforePlay = NO;
+                
+                [_player addObserver:self
+                              forKeyPath:kCurrentItemKey
+                                 options:NSKeyValueObservingOptionInitial | NSKeyValueObservingOptionNew
+                                 context:AVPlayerDemoPlaybackViewControllerCurrentItemObservationContext];
+                
+                [_player addObserver:self
+                              forKeyPath:kRateKey
+                                 options:NSKeyValueObservingOptionInitial | NSKeyValueObservingOptionNew
+                                 context:AVPlayerDemoPlaybackViewControllerRateObservationContext];            
+                
+                
+                [_progressSlider setValue:0.0];
+                
             });
         }
         else
@@ -148,13 +178,12 @@ static void *AVPlayerItemStatusContext = &AVPlayerItemStatusContext;
     _playButton.backgroundColor = [UIColor clearColor];
     _playButton.showsTouchWhenHighlighted = YES;
     
-    _playing = NO;
     [self updatePlayButton];
 }
 
 - (IBAction)playButtonTouched:(id)sender {
     [NSObject cancelPreviousPerformRequestsWithTarget:self];
-    if(_playing){
+    if([self isPlaying]){
         [self pause];
     }else{
         [self play];
@@ -164,16 +193,22 @@ static void *AVPlayerItemStatusContext = &AVPlayerItemStatusContext;
 - (void) updatePlayButton
 {
     
-    [_playButton setImage:[UIImage imageNamed:_playing ? @"playback_pause" : @"playback_play"]
+    [_playButton setImage:[UIImage imageNamed:[self isPlaying] ? @"playback_pause" : @"playback_play"]
                  forState:UIControlStateNormal];
 }
 
 -(void) play
 {
-    if (_playing)
+    if ([self isPlaying])
         return;
+    /* If we are at the end of the movie, we must seek to the beginning first
+     before starting playback. */
+	if (YES == seekToZeroBeforePlay)
+	{
+		seekToZeroBeforePlay = NO;
+		[_player seekToTime:kCMTimeZero];
+	}
     
-    _playing = YES;
     [self updatePlayButton];
     [_player play];
     
@@ -182,10 +217,9 @@ static void *AVPlayerItemStatusContext = &AVPlayerItemStatusContext;
 
 - (void) pause
 {
-    if (!_playing)
+    if (![self isPlaying])
         return;
     
-    _playing = NO;
     [self updatePlayButton];
     [_player pause];
     
@@ -199,6 +233,10 @@ static void *AVPlayerItemStatusContext = &AVPlayerItemStatusContext;
     _progressSlider.autoresizingMask = UIViewAutoresizingFlexibleWidth;
     _progressSlider.continuous = NO;
     _progressSlider.value = 0;
+    
+    [self initScrubberTimer];
+	
+	[self syncScrubber];
     
 }
 
@@ -224,7 +262,7 @@ static void *AVPlayerItemStatusContext = &AVPlayerItemStatusContext;
     }else{
         [self hideControlsFast];
     }
-        
+    
     
     [self scheduleHideControls];
 }
@@ -252,7 +290,7 @@ static void *AVPlayerItemStatusContext = &AVPlayerItemStatusContext;
                          if(finished)
                              _playerControlBackgroundView.hidden = YES;
                      }];
-
+    
 }
 
 -(void) hideControlsFast
@@ -281,82 +319,11 @@ static void *AVPlayerItemStatusContext = &AVPlayerItemStatusContext;
 
 
 
-#pragma mark video observing
-- (void)stopLoadingAnimationAndHandleError:(NSError *)error
-{
-	if (error) {
-        NSString *cancelButtonTitle = NSLocalizedString(@"OK", @"Cancel button title for animation load error");
-		UIAlertView *alertView = [[UIAlertView alloc] initWithTitle:[error localizedDescription] message:[error localizedFailureReason] delegate:nil cancelButtonTitle:cancelButtonTitle otherButtonTitles:nil];
-		[alertView show];
-	}
-}
 
-- (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context
-{
-	if (context == AVPlayerItemStatusContext) {
-		AVPlayerStatus status = [change[NSKeyValueChangeNewKey] integerValue];
-		switch (status) {
-			case AVPlayerItemStatusUnknown:
-				break;
-			case AVPlayerItemStatusReadyToPlay:
-//                [self showControlsFast];
-				break;
-			case AVPlayerItemStatusFailed:
-				[self stopLoadingAnimationAndHandleError:[[_player currentItem] error]];
-				break;
-		}
-	}
-	else {
-		[super observeValueForKeyPath:keyPath ofObject:object change:change context:context];
-	}
-}
 
-- (void)addDidPlayToEndTimeNotificationForPlayerItem:(AVPlayerItem *)item
-{
-	if (_notificationToken)
-		_notificationToken = nil;
-	
-	_player.actionAtItemEnd = AVPlayerActionAtItemEndNone;
-	_notificationToken = [[NSNotificationCenter defaultCenter] addObserverForName:AVPlayerItemDidPlayToEndTimeNotification object:item queue:[NSOperationQueue mainQueue] usingBlock:^(NSNotification *note) {
-		[[_player currentItem] seekToTime:kCMTimeZero];
-	}];
-}
 
-- (void)syncTimeLabel
-{
-	double seconds = CMTimeGetSeconds([_player currentTime]);
-	if (!isfinite(seconds)) {
-		seconds = 0;
-	}
-	
-	int secondsInt = round(seconds);
-	int minutes = secondsInt/60;
-	secondsInt -= minutes*60;
-	
-    //	self.currentTime.textColor = [UIColor colorWithWhite:1.0 alpha:1.0];
-    //	self.currentTime.textAlignment = NSTextAlignmentCenter;
-    //
-    //	self.currentTime.text = [NSString stringWithFormat:@"%.2i:%.2i", minutes, secondsInt];
-}
 
-- (void)addTimeObserverToPlayer
-{
-	/*
-	 Adds a time observer to the player to periodically refresh the time label to reflect current time.
-	 */
-    if (_timeObserver)
-        return;
-    /*
-     Use __weak reference to self to ensure that a strong reference cycle is not formed between the view controller, player and notification block.
-     */
-    __weak VIDVideoPlayerViewController* weakSelf = self;
-    _timeObserver = [_player addPeriodicTimeObserverForInterval:CMTimeMakeWithSeconds(1, 10) queue:dispatch_get_main_queue() usingBlock:
-                     ^(CMTime time) {
-                         [weakSelf syncTimeLabel];
-                     }];
-}
-
-- (void)removeTimeObserverFromPlayer
+- (void)removeTimeObserverFro_player
 {
     if (_timeObserver)
     {
@@ -365,6 +332,205 @@ static void *AVPlayerItemStatusContext = &AVPlayerItemStatusContext;
     }
 }
 
+
+#pragma mark slider progress management
+-(void)initScrubberTimer
+{
+	double interval = .1f;
+	
+	CMTime playerDuration = [self playerItemDuration];
+	if (CMTIME_IS_INVALID(playerDuration))
+	{
+		return;
+	}
+	double duration = CMTimeGetSeconds(playerDuration);
+	if (isfinite(duration))
+	{
+		CGFloat width = CGRectGetWidth([_progressSlider bounds]);
+		interval = 0.5f * duration / width;
+	}
+    
+
+    __weak VIDVideoPlayerViewController* weakSelf = self;
+	_timeObserver = [_player addPeriodicTimeObserverForInterval:CMTimeMakeWithSeconds(interval, NSEC_PER_SEC)
+                                                          queue:NULL /* If you pass NULL, the main queue is used. */
+                                                     usingBlock:^(CMTime time)
+                     {
+                         [weakSelf syncScrubber];
+                     }];
+    
+}
+
+
+
+- (CMTime)playerItemDuration
+{
+	AVPlayerItem *playerItem = [_player currentItem];
+	if (playerItem.status == AVPlayerItemStatusReadyToPlay)
+	{
+        /*
+         NOTE:
+         Because of the dynamic nature of HTTP Live Streaming Media, the best practice
+         for obtaining the duration of an AVPlayerItem object has changed in iOS 4.3.
+         Prior to iOS 4.3, you would obtain the duration of a player item by fetching
+         the value of the duration property of its associated AVAsset object. However,
+         note that for HTTP Live Streaming Media the duration of a player item during
+         any particular playback session may differ from the duration of its asset. For
+         this reason a new key-value observable duration property has been defined on
+         AVPlayerItem.
+         
+         See the AV Foundation Release Notes for iOS 4.3 for more information.
+         */
+        
+		return([playerItem duration]);
+	}
+	
+	return(kCMTimeInvalid);
+}
+
+
+
+- (void)syncScrubber
+{
+	CMTime playerDuration = [self playerItemDuration];
+	if (CMTIME_IS_INVALID(playerDuration))
+	{
+		_progressSlider.minimumValue = 0.0;
+		return;
+	}
+    
+	double duration = CMTimeGetSeconds(playerDuration);
+	if (isfinite(duration))
+	{
+		float minValue = [_progressSlider minimumValue];
+		float maxValue = [_progressSlider maximumValue];
+		double time = CMTimeGetSeconds([_player currentTime]);
+		
+		[_progressSlider setValue:(maxValue - minValue) * time / duration + minValue];
+	}
+}
+
+/* The user is dragging the movie controller thumb to scrub through the movie. */
+- (IBAction)beginScrubbing:(id)sender
+{
+	mRestoreAfterScrubbingRate = [_player rate];
+	[_player setRate:0.f];
+	
+	/* Remove previous timer. */
+	[self removeTimeObserverFro_player];
+}
+
+/* Set the player current time to match the scrubber position. */
+- (IBAction)scrub:(id)sender
+{
+	if ([sender isKindOfClass:[UISlider class]])
+	{
+		UISlider* slider = sender;
+		
+		CMTime playerDuration = [self playerItemDuration];
+		if (CMTIME_IS_INVALID(playerDuration)) {
+			return;
+		}
+		
+		double duration = CMTimeGetSeconds(playerDuration);
+		if (isfinite(duration))
+		{
+			float minValue = [slider minimumValue];
+			float maxValue = [slider maximumValue];
+			float value = [slider value];
+			
+			double time = duration * (value - minValue) / (maxValue - minValue);
+			
+			[_player seekToTime:CMTimeMakeWithSeconds(time, NSEC_PER_SEC)];
+		}
+	}
+}
+
+/* The user has released the movie thumb control to stop scrubbing through the movie. */
+- (IBAction)endScrubbing:(id)sender
+{
+	if (!_timeObserver)
+	{
+		CMTime playerDuration = [self playerItemDuration];
+		if (CMTIME_IS_INVALID(playerDuration))
+		{
+			return;
+		}
+		
+		double duration = CMTimeGetSeconds(playerDuration);
+		if (isfinite(duration))
+		{
+			CGFloat width = CGRectGetWidth([_progressSlider bounds]);
+			double tolerance = 0.5f * duration / width;
+            
+            __weak VIDVideoPlayerViewController* weakSelf = self;
+			_timeObserver = [_player addPeriodicTimeObserverForInterval:CMTimeMakeWithSeconds(tolerance, NSEC_PER_SEC) queue:NULL usingBlock:
+                             ^(CMTime time)
+                             {
+                                 [weakSelf syncScrubber];
+                             }];
+		}
+	}
+    
+	if (mRestoreAfterScrubbingRate)
+	{
+		[_player setRate:mRestoreAfterScrubbingRate];
+		mRestoreAfterScrubbingRate = 0.f;
+	}
+}
+
+- (BOOL)isScrubbing
+{
+	return mRestoreAfterScrubbingRate != 0.f;
+}
+
+-(void)enableScrubber
+{
+    _progressSlider.enabled = YES;
+}
+
+-(void)disableScrubber
+{
+    _progressSlider.enabled = NO;
+}
+
+- (void)observeValueForKeyPath:(NSString*) path
+                      ofObject:(id)object
+                        change:(NSDictionary*)change
+                       context:(void*)context
+{
+	
+	/* AVPlayer "rate" property value observer. */
+    if (context == AVPlayerDemoPlaybackViewControllerRateObservationContext)
+	{
+        [self updatePlayButton];
+       // NSLog(@"AVPlayerDemoPlaybackViewControllerRateObservationContext");
+	}
+	/* AVPlayer "currentItem" property observer.
+     Called when the AVPlayer replaceCurrentItemWithPlayerItem:
+     replacement will/did occur. */
+	else if (context == AVPlayerDemoPlaybackViewControllerCurrentItemObservationContext)
+	{
+       // NSLog(@"AVPlayerDemoPlaybackViewControllerCurrentItemObservationContext");
+	}
+	else
+	{
+		[super observeValueForKeyPath:path ofObject:object change:change context:context];
+	}
+}
+
+- (BOOL)isPlaying
+{
+	return mRestoreAfterScrubbingRate != 0.f || [_player rate] != 0.f;
+}
+
+/* Called when the player item has played to its end time. */
+- (void)playerItemDidReachEnd:(NSNotification *)notification
+{
+	/* After the movie has played to its end time, seek back to time zero
+     to play it again. */
+	seekToZeroBeforePlay = YES;
+}
 
 
 
