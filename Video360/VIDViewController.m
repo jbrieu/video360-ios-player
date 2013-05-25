@@ -9,6 +9,7 @@
 #import "VIDViewController.h"
 #import "sphere5.h"
 #import "GLProgram.h"
+#import "VIDVideoPlayerViewController.h"
 
 
 #define MAX_OVERTURE 95.0
@@ -50,10 +51,7 @@ GLint uniforms[NUM_UNIFORMS];
     float _rotationY;
     CGFloat _overture;
     
-    AVPlayerItemVideoOutput* _videoOutput;
-    AVPlayer* _player;
-    AVPlayerItem* _playerItem;
-    
+       
     CVOpenGLESTextureRef _lumaTexture;
     CVOpenGLESTextureRef _chromaTexture;
 	CVOpenGLESTextureCacheRef _videoTextureCache;
@@ -85,6 +83,9 @@ GLint uniforms[NUM_UNIFORMS];
     view.context = self.context;
     view.drawableDepthFormat = GLKViewDrawableDepthFormat24;
     
+    UIPinchGestureRecognizer *pinchRecognizer = [[UIPinchGestureRecognizer alloc] initWithTarget:self action:@selector(handlePinchGesture:)];
+    [view addGestureRecognizer:pinchRecognizer];
+    
     self.preferredFramesPerSecond = 60.0f;
     
     _overture = DEFAULT_OVERTURE;
@@ -94,7 +95,6 @@ GLint uniforms[NUM_UNIFORMS];
     
     [self setupGL];
     
-    [self setupVideoPlayback];
 }
 
 - (void)dealloc
@@ -122,40 +122,6 @@ GLint uniforms[NUM_UNIFORMS];
     }
     
     // Dispose of any resources that can be recreated.
-}
-
-#pragma mark video methods
-#warning TODO : porter sur iOS5
-
--(void)setupVideoPlayback
-{
-    NSURL *url = [[NSBundle mainBundle]
-                  URLForResource: @"demo" withExtension:@"mp4"];
-    
-    AVURLAsset *asset = [AVURLAsset URLAssetWithURL:url options:nil];
-    [asset loadValuesAsynchronouslyForKeys:[NSArray arrayWithObject:@"tracks"] completionHandler:^{
-        
-        NSError* error = nil;
-        AVKeyValueStatus status = [asset statusOfValueForKey:@"tracks" error:&error];
-        if (status == AVKeyValueStatusLoaded)
-        {
-            NSDictionary* settings = @{ (id)kCVPixelBufferPixelFormatTypeKey : [NSNumber numberWithInt:kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange]};
-            _videoOutput = [[AVPlayerItemVideoOutput alloc] initWithPixelBufferAttributes:settings];
-            _playerItem = [AVPlayerItem playerItemWithAsset:asset];
-            [_playerItem addOutput:_videoOutput];
-            _player = [AVPlayer playerWithPlayerItem:_playerItem];
-            
-            
-            dispatch_async(dispatch_get_main_queue(), ^{
-                [_player play];
-            });
-            
-        }
-        else
-        {
-            NSLog(@"%@ Failed to load the tracks.", self);
-        }
-    }];
 }
 
 
@@ -271,7 +237,8 @@ GLint uniforms[NUM_UNIFORMS];
 - (void)glkView:(GLKView *)view drawInRect:(CGRect)rect
 {
     
-    CVPixelBufferRef pixelBuffer = [_videoOutput copyPixelBufferForItemTime:[_playerItem currentTime] itemTimeForDisplay:nil];
+
+    CVPixelBufferRef pixelBuffer = [self.videoPlayerController retrievePixelBufferToDraw];
     
     CVReturn err;
 	if (pixelBuffer != NULL) {
@@ -415,19 +382,10 @@ GLint uniforms[NUM_UNIFORMS];
         [_currentTouches removeObject:touch];
     }
 }
-- (IBAction)playPause:(id)sender {
-    if (_player.rate == 1.0) {
-        [_player pause];
-    } else {
-        [_player play];
-    }
-}
-- (IBAction)playIPhone:(id)sender {
-    [self playPause:sender];
-}
 
 
-- (IBAction)handlePinchGesture:(UIPinchGestureRecognizer *)recognizer
+
+- (void)handlePinchGesture:(UIPinchGestureRecognizer *)recognizer
 {    
     _overture /= recognizer.scale;
 
@@ -437,11 +395,8 @@ GLint uniforms[NUM_UNIFORMS];
         _overture = MIN_OVERTURE;
 	
 }
-#warning TODO : c'est sale ! faire programatiquement
-#warning TODO créer classe camera
-- (IBAction)handlePinchGestureIPhone:(id)sender {
-    [self handlePinchGesture:sender];
-}
+
+
 
 
 

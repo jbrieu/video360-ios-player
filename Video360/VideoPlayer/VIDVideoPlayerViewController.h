@@ -7,7 +7,10 @@
 //
 
 #import <UIKit/UIKit.h>
+#import <AVFoundation/AVFoundation.h>
 
-@interface VIDVideoPlayerViewController : UIViewController
+@interface VIDVideoPlayerViewController : UIViewController<AVPlayerItemOutputPullDelegate>
+
+- (CVPixelBufferRef) retrievePixelBufferToDraw;
 
 @end

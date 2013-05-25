@@ -8,8 +8,10 @@
 
 #import <UIKit/UIKit.h>
 #import <GLKit/GLKit.h>
-#import <AVFoundation/AVFoundation.h>
+@class VIDVideoPlayerViewController;
 
-@interface VIDViewController : GLKViewController<AVPlayerItemOutputPullDelegate>
+@interface VIDViewController : GLKViewController<UIGestureRecognizerDelegate>
+
+@property (strong, nonatomic, readwrite) VIDVideoPlayerViewController* videoPlayerController;
 
 @end
