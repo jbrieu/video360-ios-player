@@ -147,6 +147,12 @@ static void *AVPlayerItemStatusContext = &AVPlayerItemStatusContext;
     _glkViewController.view.frame = self.view.bounds;
 }
 
+#pragma mark hide controls
+-(void) toggleControls
+{
+    _playerControlBackgroundView.hidden = !_playerControlBackgroundView.hidden;
+}
+
 
 #pragma mark play button management
 -(void)configurePlayButton

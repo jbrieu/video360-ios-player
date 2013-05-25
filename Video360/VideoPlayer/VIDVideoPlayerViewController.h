@@ -11,6 +11,7 @@
 
 @interface VIDVideoPlayerViewController : UIViewController<AVPlayerItemOutputPullDelegate>
 
-- (CVPixelBufferRef) retrievePixelBufferToDraw;
+-(CVPixelBufferRef) retrievePixelBufferToDraw;
+-(void) toggleControls;
 
 @end
