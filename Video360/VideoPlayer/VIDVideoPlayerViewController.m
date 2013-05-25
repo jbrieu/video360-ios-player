@@ -58,19 +58,7 @@ static void *AVPlayerItemStatusContext = &AVPlayerItemStatusContext;
         
 }
 
--(void)configureControleBackgroundView
-{
-    CGFloat parentWidth = self.view.bounds.size.width;
-    CGFloat parentHeight = self.view.bounds.size.height;
-    
-    CGFloat width  = parentWidth /3 ;
-    CGFloat height = parentHeight / 7;
-    
-    CGFloat x = parentWidth / 2 - width / 2 ;
-    CGFloat y = parentHeight - height ;
-    
-    _playerControlBackgroundView.frame = CGRectMake(x, y, width, height);
-}
+
 
 - (void)didReceiveMemoryWarning
 {
@@ -147,11 +135,7 @@ static void *AVPlayerItemStatusContext = &AVPlayerItemStatusContext;
     _glkViewController.view.frame = self.view.bounds;
 }
 
-#pragma mark hide controls
--(void) toggleControls
-{
-    _playerControlBackgroundView.hidden = !_playerControlBackgroundView.hidden;
-}
+
 
 
 #pragma mark play button management
@@ -295,6 +279,26 @@ static void *AVPlayerItemStatusContext = &AVPlayerItemStatusContext;
     }
 }
 
+
+#pragma mark controls management
+-(void)configureControleBackgroundView
+{
+    CGFloat parentWidth = self.view.bounds.size.width;
+    CGFloat parentHeight = self.view.bounds.size.height;
+    
+    CGFloat width  = parentWidth /3 ;
+    CGFloat height = parentHeight / 8;
+    
+    CGFloat x = parentWidth / 2 - width / 2 ;
+    CGFloat y = parentHeight - height ;
+    
+    _playerControlBackgroundView.frame = CGRectMake(x, y, width, height);
+}
+
+-(void) toggleControls
+{
+    _playerControlBackgroundView.hidden = !_playerControlBackgroundView.hidden;
+}
 
 
 @end
