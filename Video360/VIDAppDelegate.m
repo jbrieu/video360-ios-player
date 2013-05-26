@@ -7,7 +7,7 @@
 //
 
 #import "VIDAppDelegate.h"
-#import "VIDVideoPlayerViewController.h"
+#import "VIDMenuViewController.h"
 
 @implementation VIDAppDelegate
 
@@ -15,7 +15,7 @@
 {
     self.window = [[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
 
-    self.viewController = [[VIDVideoPlayerViewController alloc] initWithNibName:@"VIDVideoPlayerViewController" bundle:nil];
+    self.viewController = [[VIDMenuViewController alloc] initWithNibName:@"VIDMenuViewController" bundle:nil];
 
     self.window.rootViewController = self.viewController;
     [self.window makeKeyAndVisible];

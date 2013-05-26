@@ -7,11 +7,11 @@
 //
 
 #import <UIKit/UIKit.h>
-@class VIDVideoPlayerViewController;
+@class VIDMenuViewController;
 
 @interface VIDAppDelegate : UIResponder <UIApplicationDelegate>
 
 @property (strong, nonatomic) UIWindow *window;
-@property (strong, nonatomic) VIDVideoPlayerViewController *viewController;
+@property (strong, nonatomic) VIDMenuViewController *viewController;
 
 @end

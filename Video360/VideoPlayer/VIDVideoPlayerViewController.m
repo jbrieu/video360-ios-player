@@ -42,6 +42,7 @@ static void *AVPlayerItemStatusContext = &AVPlayerItemStatusContext;
 @property (strong, nonatomic) IBOutlet UIButton *playButton;
 @property (strong, nonatomic) IBOutlet UISlider *progressSlider;
 
+
 @end
 
 @implementation VIDVideoPlayerViewController
@@ -63,7 +64,7 @@ static void *AVPlayerItemStatusContext = &AVPlayerItemStatusContext;
     [self configureProgressSlider];
     [self configureControleBackgroundView];
     
-    [self setupVideoPlayback];
+    [self setupVideoPlaybackForURL:_videoURL];
     
     [self configureGLKView];
     
@@ -96,7 +97,7 @@ static void *AVPlayerItemStatusContext = &AVPlayerItemStatusContext;
 #pragma mark video setting
 #warning TODO : porter sur iOS5
 
--(void)setupVideoPlayback
+-(void)setupVideoPlaybackForURL:(NSURL*)url
 {
     
 	NSDictionary *pixBuffAttributes = @{(id)kCVPixelBufferPixelFormatTypeKey: @(kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange)};
@@ -105,10 +106,7 @@ static void *AVPlayerItemStatusContext = &AVPlayerItemStatusContext;
 	[_videoOutput setDelegate:self queue:_myVideoOutputQueue];
     
     _player = [[AVPlayer alloc] init];
-    
-    NSURL *url = [[NSBundle mainBundle]
-                  URLForResource: @"demo" withExtension:@"mp4"];
-    
+        
     AVURLAsset *asset = [AVURLAsset URLAssetWithURL:url options:nil];
     [asset loadValuesAsynchronouslyForKeys:[NSArray arrayWithObject:@"tracks"] completionHandler:^{
         

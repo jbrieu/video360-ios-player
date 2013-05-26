@@ -11,6 +11,8 @@
 
 @interface VIDVideoPlayerViewController : UIViewController<AVPlayerItemOutputPullDelegate>
 
+@property (strong, nonatomic) NSURL *videoURL;
+
 -(CVPixelBufferRef) retrievePixelBufferToDraw;
 -(void) toggleControls;
 
