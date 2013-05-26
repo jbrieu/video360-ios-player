@@ -47,27 +47,25 @@ static void *AVPlayerItemStatusContext = &AVPlayerItemStatusContext;
 
 @implementation VIDVideoPlayerViewController
 
-- (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
+- (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil url:(NSURL*)url
 {
     self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
     if (self) {
-        // Custom initialization
+        [self setVideoURL:url];
     }
     return self;
 }
 
-- (void)viewDidLoad
+
+-(void)viewWillAppear:(BOOL)animated
 {
-    [super viewDidLoad];
-    
-    [self configurePlayButton];
-    [self configureProgressSlider];
-    [self configureControleBackgroundView];
-    
     [self setupVideoPlaybackForURL:_videoURL];
     
     [self configureGLKView];
     
+    [self configurePlayButton];
+    [self configureProgressSlider];
+    [self configureControleBackgroundView];
 }
 
 
@@ -106,7 +104,6 @@ static void *AVPlayerItemStatusContext = &AVPlayerItemStatusContext;
 	[_videoOutput setDelegate:self queue:_myVideoOutputQueue];
     
     _player = [[AVPlayer alloc] init];
-        
     AVURLAsset *asset = [AVURLAsset URLAssetWithURL:url options:nil];
     [asset loadValuesAsynchronouslyForKeys:[NSArray arrayWithObject:@"tracks"] completionHandler:^{
         

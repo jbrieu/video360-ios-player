@@ -13,6 +13,8 @@
 
 @property (strong, nonatomic) NSURL *videoURL;
 
+-(id) initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil url:(NSURL*)url;
+
 -(CVPixelBufferRef) retrievePixelBufferToDraw;
 -(void) toggleControls;
 

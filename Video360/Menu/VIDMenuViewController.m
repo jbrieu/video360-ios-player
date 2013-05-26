@@ -10,7 +10,7 @@
 #import "VIDVideoPlayerViewController.h"
 
 @interface VIDMenuViewController ()
-@property (strong, nonatomic) IBOutlet UIButton *buttonZone4;
+
 
 @end
 
@@ -38,7 +38,6 @@
 }
 
 - (void)viewDidUnload {
-    [self setButtonZone4:nil];
     [super viewDidUnload];
 }
 
@@ -46,18 +45,23 @@
 
 - (IBAction)buttonZone4Touched:(id)sender {
     NSURL *url = [[NSBundle mainBundle]
-                  URLForResource: @"demo" withExtension:@"mp4"];
+                  URLForResource: @"demo2" withExtension:@"mp4"];
     [self launchVideoWithURL:url];
     
+}
+
+- (IBAction)buttonZone5Touched:(id)sender {
+    NSURL *url = [[NSBundle mainBundle]
+                  URLForResource: @"demo" withExtension:@"mp4"];
+    [self launchVideoWithURL:url];
 }
 
 #pragma mark launch actions
 -(void) launchVideoWithURL:(NSURL*)url
 {
-    VIDVideoPlayerViewController *videoController = [[VIDVideoPlayerViewController alloc] initWithNibName:@"VIDVideoPlayerViewController" bundle:nil];
-    videoController.videoURL = url;
-    
-    [self presentModalViewController:videoController animated:YES];
+    VIDVideoPlayerViewController *videoController = [[VIDVideoPlayerViewController alloc] initWithNibName:@"VIDVideoPlayerViewController" bundle:nil url:url];
+
+    [self presentViewController:videoController animated:YES completion:nil];
 }
 
 @end
