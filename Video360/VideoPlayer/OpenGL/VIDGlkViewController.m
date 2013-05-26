@@ -242,6 +242,16 @@ GLint uniforms[NUM_UNIFORMS];
 {
     
 
+    [_program use];
+    
+    glBindVertexArrayOES(_vertexArrayID);
+    
+    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+    glClear(GL_COLOR_BUFFER_BIT);
+    
+        
+    glUniformMatrix4fv(uniforms[UNIFORM_MODELVIEWPROJECTION_MATRIX], 1, 0, _modelViewProjectionMatrix.m);
+    
     CVPixelBufferRef pixelBuffer = [self.videoPlayerController retrievePixelBufferToDraw];
     
     CVReturn err;
@@ -305,34 +315,27 @@ GLint uniforms[NUM_UNIFORMS];
 		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
         
         CFRelease(pixelBuffer);
+        
+
+        
+        glDrawArrays(GL_TRIANGLES, 0, sphere5NumVerts);
     }
     
-    [_program use];
     
-    glBindVertexArrayOES(_vertexArrayID);
     
-    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-    glClear(GL_COLOR_BUFFER_BIT);
     
-    glUniformMatrix4fv(uniforms[UNIFORM_MODELVIEWPROJECTION_MATRIX], 1, 0, _modelViewProjectionMatrix.m);
-    
-    glDrawArrays(GL_TRIANGLES, 0, sphere5NumVerts);
 }
 
 #pragma mark - OpenGL Program
 - (void)buildProgram
 {
-    //Create program
+
     _program = [[GLProgram alloc]
                 initWithVertexShaderFilename:@"Shader"
                 fragmentShaderFilename:@"Shader"];
-    
-    //Assign Attributes
-    
+        
     [_program addAttribute:@"position"];
     [_program addAttribute:@"texCoord"];
-    
-    //Link Program
     
     if (![_program link])
 	{

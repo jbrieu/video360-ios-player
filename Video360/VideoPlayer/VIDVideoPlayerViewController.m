@@ -42,6 +42,7 @@ static void *AVPlayerItemStatusContext = &AVPlayerItemStatusContext;
 @property (strong, nonatomic) IBOutlet UIButton *playButton;
 @property (strong, nonatomic) IBOutlet UISlider *progressSlider;
 
+@property (strong, nonatomic) IBOutlet UIButton *backButton;
 
 @end
 
@@ -80,6 +81,7 @@ static void *AVPlayerItemStatusContext = &AVPlayerItemStatusContext;
     [self setPlayerControlBackgroundView:nil];
     [self setPlayButton:nil];
     [self setProgressSlider:nil];
+    [self setBackButton:nil];
     [super viewDidUnload];
 }
 
@@ -526,6 +528,28 @@ static void *AVPlayerItemStatusContext = &AVPlayerItemStatusContext;
      to play it again. */
 	seekToZeroBeforePlay = YES;
 }
+
+#pragma mark back button
+- (IBAction)backButtonTouched:(id)sender {
+    [self removePlayerTimeObserver];
+	
+	[_player removeObserver:self forKeyPath:@"rate"];
+	
+	[_player pause];
+    
+    [self dismissViewControllerAnimated:YES completion:nil];
+}
+
+/* Cancels the previously registered time observer. */
+-(void)removePlayerTimeObserver
+{
+	if (_timeObserver)
+	{
+		[_player removeTimeObserver:_timeObserver];
+		_timeObserver = nil;
+	}
+}
+
 
 
 
