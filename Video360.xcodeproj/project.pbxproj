@@ -10,7 +10,7 @@
 		010BD46F175212B2004FA712 /* VIDMenuViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 010BD46D175212B2004FA712 /* VIDMenuViewController.m */; };
 		010BD470175212B2004FA712 /* VIDMenuViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 010BD46E175212B2004FA712 /* VIDMenuViewController.xib */; };
 		010BD47617521D02004FA712 /* demo.mp4 in Resources */ = {isa = PBXBuildFile; fileRef = 010BD47417521D02004FA712 /* demo.mp4 */; };
-		010BD47717521D02004FA712 /* demo2.mp4 in Resources */ = {isa = PBXBuildFile; fileRef = 010BD47517521D02004FA712 /* demo2.mp4 */; };
+		010BD47A17526972004FA712 /* demo2.mp4 in Resources */ = {isa = PBXBuildFile; fileRef = 010BD47917526972004FA712 /* demo2.mp4 */; };
 		010E3721174AD4B30029C96E /* Shader.fsh in Resources */ = {isa = PBXBuildFile; fileRef = 012C6765174A08CA0098A148 /* Shader.fsh */; };
 		010E3722174AD4B30029C96E /* Shader.vsh in Resources */ = {isa = PBXBuildFile; fileRef = 012C6766174A08CA0098A148 /* Shader.vsh */; };
 		012C66A5173A9F700098A148 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 012C66A4173A9F700098A148 /* UIKit.framework */; };
@@ -63,7 +63,7 @@
 		010BD46D175212B2004FA712 /* VIDMenuViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = VIDMenuViewController.m; sourceTree = "<group>"; };
 		010BD46E175212B2004FA712 /* VIDMenuViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = VIDMenuViewController.xib; sourceTree = "<group>"; };
 		010BD47417521D02004FA712 /* demo.mp4 */ = {isa = PBXFileReference; lastKnownFileType = file; path = demo.mp4; sourceTree = "<group>"; };
-		010BD47517521D02004FA712 /* demo2.mp4 */ = {isa = PBXFileReference; lastKnownFileType = file; path = demo2.mp4; sourceTree = "<group>"; };
+		010BD47917526972004FA712 /* demo2.mp4 */ = {isa = PBXFileReference; lastKnownFileType = file; path = demo2.mp4; sourceTree = "<group>"; };
 		012C66A1173A9F700098A148 /* Video360.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Video360.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		012C66A4173A9F700098A148 /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
 		012C66A6173A9F700098A148 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
@@ -152,8 +152,8 @@
 		010BD47317521D02004FA712 /* EmbeddedVideos */ = {
 			isa = PBXGroup;
 			children = (
+				010BD47917526972004FA712 /* demo2.mp4 */,
 				010BD47417521D02004FA712 /* demo.mp4 */,
-				010BD47517521D02004FA712 /* demo2.mp4 */,
 			);
 			path = EmbeddedVideos;
 			sourceTree = "<group>";
@@ -361,6 +361,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				010BD47617521D02004FA712 /* demo.mp4 in Resources */,
 				010E3721174AD4B30029C96E /* Shader.fsh in Resources */,
 				010E3722174AD4B30029C96E /* Shader.vsh in Resources */,
 				012C66B3173A9F700098A148 /* InfoPlist.strings in Resources */,
@@ -377,8 +378,7 @@
 				01FE30E817520890000F8296 /* menu02-ipad.png in Resources */,
 				01FE30E917520890000F8296 /* menu02-ipad@2x.png in Resources */,
 				010BD470175212B2004FA712 /* VIDMenuViewController.xib in Resources */,
-				010BD47617521D02004FA712 /* demo.mp4 in Resources */,
-				010BD47717521D02004FA712 /* demo2.mp4 in Resources */,
+				010BD47A17526972004FA712 /* demo2.mp4 in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

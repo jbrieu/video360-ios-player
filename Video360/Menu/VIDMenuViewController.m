@@ -42,6 +42,12 @@
 }
 
 #pragma mark button management
+- (IBAction)buttonZone1Touched:(id)sender {
+    NSURL *url = [[NSBundle mainBundle]
+                  URLForResource: @"demo" withExtension:@"mp4"];
+    [self launchVideoWithURL:url];
+    
+}
 
 - (IBAction)buttonZone4Touched:(id)sender {
     NSURL *url = [[NSBundle mainBundle]
@@ -56,12 +62,21 @@
     [self launchVideoWithURL:url];
 }
 
+- (IBAction)buttonZone6Touched:(id)sender {
+    NSString *path = [[NSBundle mainBundle] pathForResource:@"demo2" ofType:@"mp4"];
+    NSURL *url = [[NSURL alloc] initFileURLWithPath:path];
+    [self launchVideoWithURL:url];
+}
+
 #pragma mark launch actions
 -(void) launchVideoWithURL:(NSURL*)url
 {
     VIDVideoPlayerViewController *videoController = [[VIDVideoPlayerViewController alloc] initWithNibName:@"VIDVideoPlayerViewController" bundle:nil url:url];
 
-    [self presentViewController:videoController animated:YES completion:nil];
+    if(![[self presentedViewController] isBeingDismissed])
+    {
+        [self presentViewController:videoController animated:YES completion:nil];
+    }
 }
 
 @end

@@ -17,9 +17,11 @@
 /* AVPlayer keys */
 NSString * const kRateKey			= @"rate";
 NSString * const kCurrentItemKey	= @"currentItem";
+NSString * const kStatusKey         = @"status";
 
 static void *AVPlayerDemoPlaybackViewControllerRateObservationContext = &AVPlayerDemoPlaybackViewControllerRateObservationContext;
 static void *AVPlayerDemoPlaybackViewControllerCurrentItemObservationContext = &AVPlayerDemoPlaybackViewControllerCurrentItemObservationContext;
+static void *AVPlayerDemoPlaybackViewControllerStatusObservationContext = &AVPlayerDemoPlaybackViewControllerStatusObservationContext;
 
 static void *AVPlayerItemStatusContext = &AVPlayerItemStatusContext;
 
@@ -97,7 +99,7 @@ static void *AVPlayerItemStatusContext = &AVPlayerItemStatusContext;
 #pragma mark video setting
 #warning TODO : porter sur iOS5
 
--(void)setupVideoPlaybackForURL:(NSURL*)url
+-(void)setupVideoPlaybackForURL:(NSURL*)urlin
 {
     
 	NSDictionary *pixBuffAttributes = @{(id)kCVPixelBufferPixelFormatTypeKey: @(kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange)};
@@ -106,6 +108,11 @@ static void *AVPlayerItemStatusContext = &AVPlayerItemStatusContext;
 	[_videoOutput setDelegate:self queue:_myVideoOutputQueue];
     
     _player = [[AVPlayer alloc] init];
+    
+//    NSURL *url = [[NSBundle mainBundle]
+//                  URLForResource: @"demo" withExtension:@"mp4"];
+    NSString *path = [[NSBundle mainBundle] pathForResource:@"demo2" ofType:@"mp4"];
+    NSURL *url = [NSURL fileURLWithPath:path];
     AVURLAsset *asset = [AVURLAsset URLAssetWithURL:url options:nil];
     [asset loadValuesAsynchronouslyForKeys:[NSArray arrayWithObject:@"tracks"] completionHandler:^{
         
@@ -129,6 +136,11 @@ static void *AVPlayerItemStatusContext = &AVPlayerItemStatusContext;
                 
                 seekToZeroBeforePlay = NO;
                 
+                [_playerItem addObserver:self
+                                   forKeyPath:kStatusKey
+                                      options:NSKeyValueObservingOptionInitial | NSKeyValueObservingOptionNew
+                                      context:AVPlayerDemoPlaybackViewControllerStatusObservationContext];
+                
                 [_player addObserver:self
                               forKeyPath:kCurrentItemKey
                                  options:NSKeyValueObservingOptionInitial | NSKeyValueObservingOptionNew
@@ -140,7 +152,9 @@ static void *AVPlayerItemStatusContext = &AVPlayerItemStatusContext;
                                  context:AVPlayerDemoPlaybackViewControllerRateObservationContext];            
                 
                 
-                [_progressSlider setValue:0.0];
+                [self initScrubberTimer];
+                
+                [self syncScrubber];
                 
             });
         }
@@ -174,6 +188,8 @@ static void *AVPlayerItemStatusContext = &AVPlayerItemStatusContext;
     _playButton.frame = CGRectMake(_playerControlBackgroundView.bounds.size.width * 0.5 - 20, 10, 40, 40);
     _playButton.backgroundColor = [UIColor clearColor];
     _playButton.showsTouchWhenHighlighted = YES;
+    
+    [self disablePlayerButtons];
     
     [self updatePlayButton];
 }
@@ -231,13 +247,19 @@ static void *AVPlayerItemStatusContext = &AVPlayerItemStatusContext;
     _progressSlider.continuous = NO;
     _progressSlider.value = 0;
     
-    [self initScrubberTimer];
-	
-	[self syncScrubber];
-    
 }
 
 #pragma mark controls management
+
+-(void)enablePlayerButtons
+{
+    _playButton.enabled = YES;
+}
+
+-(void)disablePlayerButtons
+{
+    _playButton.enabled = YES;
+}
 -(void)configureControleBackgroundView
 {
     CGFloat parentWidth = self.view.bounds.size.width;
@@ -314,12 +336,6 @@ static void *AVPlayerItemStatusContext = &AVPlayerItemStatusContext;
                      completion:nil];
 }
 
-
-
-
-
-
-
 - (void)removeTimeObserverFro_player
 {
     if (_timeObserver)
@@ -362,8 +378,8 @@ static void *AVPlayerItemStatusContext = &AVPlayerItemStatusContext;
 
 - (CMTime)playerItemDuration
 {
-	AVPlayerItem *playerItem = [_player currentItem];
-	if (playerItem.status == AVPlayerItemStatusReadyToPlay)
+	
+	if (_playerItem.status == AVPlayerItemStatusReadyToPlay)
 	{
         /*
          NOTE:
@@ -379,7 +395,7 @@ static void *AVPlayerItemStatusContext = &AVPlayerItemStatusContext;
          See the AV Foundation Release Notes for iOS 4.3 for more information.
          */
         
-		return([playerItem duration]);
+		return([_playerItem duration]);
 	}
 	
 	return(kCMTimeInvalid);
@@ -497,8 +513,48 @@ static void *AVPlayerItemStatusContext = &AVPlayerItemStatusContext;
                        context:(void*)context
 {
 	
-	/* AVPlayer "rate" property value observer. */
-    if (context == AVPlayerDemoPlaybackViewControllerRateObservationContext)
+    /* AVPlayerItem "status" property value observer. */
+	if (context == AVPlayerDemoPlaybackViewControllerStatusObservationContext)
+	{
+		[self updatePlayButton];
+        
+        AVPlayerStatus status = [[change objectForKey:NSKeyValueChangeNewKey] integerValue];
+        switch (status)
+        {
+                /* Indicates that the status of the player is not yet known because
+                 it has not tried to load new media resources for playback */
+            case AVPlayerStatusUnknown:
+            {
+                [self removePlayerTimeObserver];
+                [self syncScrubber];
+                
+                [self disableScrubber];
+                [self disablePlayerButtons];
+            }
+                break;
+                
+            case AVPlayerStatusReadyToPlay:
+            {
+                /* Once the AVPlayerItem becomes ready to play, i.e.
+                 [playerItem status] == AVPlayerItemStatusReadyToPlay,
+                 its duration can be fetched from the item. */
+                
+                [self initScrubberTimer];
+                
+                [self enableScrubber];
+                [self enablePlayerButtons];
+            }
+                break;
+                
+            case AVPlayerStatusFailed:
+            {
+                AVPlayerItem *playerItem = (AVPlayerItem *)object;
+                [self assetFailedToPrepareForPlayback:playerItem.error];
+                NSLog(@"Error fail : %@", playerItem.error);
+            }
+                break;
+        }
+	}else if (context == AVPlayerDemoPlaybackViewControllerRateObservationContext)
 	{
         [self updatePlayButton];
        // NSLog(@"AVPlayerDemoPlaybackViewControllerRateObservationContext");
@@ -515,6 +571,24 @@ static void *AVPlayerItemStatusContext = &AVPlayerItemStatusContext;
 		[super observeValueForKeyPath:path ofObject:object change:change context:context];
 	}
 }
+
+-(void)assetFailedToPrepareForPlayback:(NSError *)error
+{
+    [self removePlayerTimeObserver];
+    [self syncScrubber];
+    [self disableScrubber];
+    [self disablePlayerButtons];
+    
+    /* Display the error. */
+	UIAlertView *alertView = [[UIAlertView alloc] initWithTitle:[error localizedDescription]
+														message:[error localizedFailureReason]
+													   delegate:nil
+											  cancelButtonTitle:@"OK"
+											  otherButtonTitles:nil];
+	[alertView show];
+}
+
+
 
 - (BOOL)isPlaying
 {
@@ -536,6 +610,8 @@ static void *AVPlayerItemStatusContext = &AVPlayerItemStatusContext;
 	[_player removeObserver:self forKeyPath:@"rate"];
 	
 	[_player pause];
+    
+    [_glkViewController removeFromParentViewController];
     
     [self dismissViewControllerAnimated:YES completion:nil];
 }
