@@ -69,6 +69,7 @@ static void *AVPlayerItemStatusContext = &AVPlayerItemStatusContext;
     [self configurePlayButton];
     [self configureProgressSlider];
     [self configureControleBackgroundView];
+    [self configureBackButton];
 }
 
 
@@ -245,6 +246,15 @@ static void *AVPlayerItemStatusContext = &AVPlayerItemStatusContext;
     
 }
 
+#pragma mark back button management
+-(void) configureBackButton
+{
+    _backButton.frame = CGRectMake(15, 15, 31, 31);
+    _backButton.backgroundColor = [UIColor clearColor];
+    _backButton.showsTouchWhenHighlighted = YES;
+   
+}
+
 #pragma mark controls management
 
 -(void)enablePlayerButtons
@@ -265,9 +275,13 @@ static void *AVPlayerItemStatusContext = &AVPlayerItemStatusContext;
     CGFloat height = parentHeight / 8;
     
     CGFloat x = parentWidth / 2 - width / 2 ;
-    CGFloat y = parentHeight - height ;
+    CGFloat y = parentHeight - height * 2 ;
+
+    _playerControlBackgroundView.layer.cornerRadius = 8;
     
     _playerControlBackgroundView.frame = CGRectMake(x, y, width, height);
+    
+
 }
 
 -(void) toggleControls
