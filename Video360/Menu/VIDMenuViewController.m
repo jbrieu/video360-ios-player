@@ -8,6 +8,7 @@
 
 #import "VIDMenuViewController.h"
 #import "VIDVideoPlayerViewController.h"
+#import "VIDMenu2ViewController.h"
 
 @interface VIDMenuViewController ()
 
@@ -49,7 +50,13 @@
 }
 
 - (IBAction)buttonZone2Touched:(id)sender {
-#pragma warning todo
+    VIDMenu2ViewController *menu2Controller = [[VIDMenu2ViewController alloc] initWithNibName:@"VIDMenu2ViewController" bundle:nil];
+    
+    if(![[self presentedViewController] isBeingDismissed])
+    {
+        [self presentViewController:menu2Controller animated:YES completion:nil];
+    }
+
 }
 
 - (IBAction)buttonZone3Touched:(id)sender {
