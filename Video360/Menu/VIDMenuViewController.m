@@ -45,8 +45,16 @@
 - (IBAction)buttonZone1Touched:(id)sender {
     NSURL *url = [[NSBundle mainBundle]
                   URLForResource: @"demo" withExtension:@"mp4"];
-    [self launchVideoWithURL:url];
-    
+    [self launchVideoWithURL:url];    
+}
+
+- (IBAction)buttonZone2Touched:(id)sender {
+#pragma warning todo
+}
+
+- (IBAction)buttonZone3Touched:(id)sender {
+    NSURL *url = [NSURL URLWithString:@"http://www.google.fr"];
+    [[UIApplication sharedApplication] openURL:url];
 }
 
 - (IBAction)buttonZone4Touched:(id)sender {
@@ -67,6 +75,8 @@
     NSURL *url = [[NSURL alloc] initFileURLWithPath:path];
     [self launchVideoWithURL:url];
 }
+
+
 
 #pragma mark launch actions
 -(void) launchVideoWithURL:(NSURL*)url

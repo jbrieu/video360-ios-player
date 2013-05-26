@@ -99,7 +99,7 @@ static void *AVPlayerItemStatusContext = &AVPlayerItemStatusContext;
 #pragma mark video setting
 #warning TODO : porter sur iOS5
 
--(void)setupVideoPlaybackForURL:(NSURL*)urlin
+-(void)setupVideoPlaybackForURL:(NSURL*)url
 {
     
 	NSDictionary *pixBuffAttributes = @{(id)kCVPixelBufferPixelFormatTypeKey: @(kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange)};
@@ -109,10 +109,6 @@ static void *AVPlayerItemStatusContext = &AVPlayerItemStatusContext;
     
     _player = [[AVPlayer alloc] init];
     
-//    NSURL *url = [[NSBundle mainBundle]
-//                  URLForResource: @"demo" withExtension:@"mp4"];
-    NSString *path = [[NSBundle mainBundle] pathForResource:@"demo2" ofType:@"mp4"];
-    NSURL *url = [NSURL fileURLWithPath:path];
     AVURLAsset *asset = [AVURLAsset URLAssetWithURL:url options:nil];
     [asset loadValuesAsynchronouslyForKeys:[NSArray arrayWithObject:@"tracks"] completionHandler:^{
         
