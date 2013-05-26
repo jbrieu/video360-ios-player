@@ -245,9 +245,7 @@ GLint uniforms[NUM_UNIFORMS];
     [_program use];
     
     glBindVertexArrayOES(_vertexArrayID);
-    
-    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-    glClear(GL_COLOR_BUFFER_BIT);
+   
     
         
     glUniformMatrix4fv(uniforms[UNIFORM_MODELVIEWPROJECTION_MATRIX], 1, 0, _modelViewProjectionMatrix.m);
@@ -316,7 +314,9 @@ GLint uniforms[NUM_UNIFORMS];
         
         CFRelease(pixelBuffer);
         
-
+        
+        glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+        glClear(GL_COLOR_BUFFER_BIT);
         
         glDrawArrays(GL_TRIANGLES, 0, sphere5NumVerts);
     }
