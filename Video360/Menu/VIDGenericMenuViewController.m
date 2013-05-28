@@ -8,8 +8,9 @@
 
 #import "VIDGenericMenuViewController.h"
 #import "VIDVideoPlayerViewController.h"
+#import "VIDMenu2ViewController.h"
 
-#define DIAPORAMA_DELAY 1.5 // delay between slide image in seconds
+#define DIAPORAMA_DELAY 1.0 // delay between slide image in seconds
 
 @interface VIDGenericMenuViewController ()
 {
@@ -42,6 +43,11 @@
     }
     
     
+}
+
+- (void)viewDidUnload {
+    [self setBackgroundImage:nil];
+    [super viewDidUnload];
 }
 
 

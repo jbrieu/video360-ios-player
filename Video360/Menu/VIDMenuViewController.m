@@ -32,10 +32,7 @@
     // Dispose of any resources that can be recreated.
 }
 
-- (void)viewDidUnload {
-    [self setBackgroundImage:nil];
-    [super viewDidUnload];
-}
+
 
 
 #pragma mark button management
@@ -45,13 +42,7 @@
 }
 
 - (IBAction)buttonZone2Touched:(id)sender {
-    VIDMenu2ViewController *menu2Controller = [[VIDMenu2ViewController alloc] initWithNibName:@"VIDMenu2ViewController" bundle:nil];
-    
-    if(![[self presentedViewController] isBeingDismissed])
-    {
-        [self presentViewController:menu2Controller animated:YES completion:nil];
-    }
-    
+    [self gotToMenu2];    
 }
 
 - (IBAction)buttonZone3Touched:(id)sender {
@@ -73,6 +64,15 @@
    [self launchVideoWithName:@"demo4"];
 }
 
+-(void) gotToMenu2
+{
+    VIDMenu2ViewController *menu2Controller = [[VIDMenu2ViewController alloc] initWithNibName:@"VIDMenu2ViewController" bundle:nil];
+    
+    if(![[self presentedViewController] isBeingDismissed])
+    {
+        [self presentViewController:menu2Controller animated:YES completion:nil];
+    }
+}
 
 
 

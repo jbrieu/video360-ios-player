@@ -32,12 +32,17 @@
 
 
 - (IBAction)buttonZone8Touched:(id)sender {
-    [self dismissViewControllerAnimated:YES completion:nil];
+    [self backToMenu1];
 }
 
 
 - (IBAction)buttonZone9Touched:(id)sender {
     [self openURLWithString:@"http://www.microsoft.com"];
+}
+
+-(void) backToMenu1
+{
+    [self dismissViewControllerAnimated:YES completion:nil];
 }
 
 
