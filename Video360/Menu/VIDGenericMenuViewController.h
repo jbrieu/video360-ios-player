@@ -14,7 +14,7 @@
 @property (strong, nonatomic) IBOutlet UIImageView *backgroundImage;
 
 
--(void) launchVideoWithURL:(NSURL*)url;
+-(void) launchVideoWithName:(NSString*)url;
 -(void) openURLWithString:(NSString*)stringurl;
 
 @end

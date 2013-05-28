@@ -38,12 +38,10 @@
 }
 
 
-
 #pragma mark button management
 - (IBAction)buttonZone1Touched:(id)sender {
-    NSURL *url = [[NSBundle mainBundle]
-                  URLForResource: @"demo" withExtension:@"mp4"];
-    [self launchVideoWithURL:url];
+    // Paris
+    [self launchVideoWithName:@"demo"];
 }
 
 - (IBAction)buttonZone2Touched:(id)sender {
@@ -56,38 +54,23 @@
     
 }
 
-
-
 - (IBAction)buttonZone3Touched:(id)sender {
     [self openURLWithString:@"http://www.google.fr"];
 }
 
 - (IBAction)buttonZone4Touched:(id)sender {
-    NSURL *url = [[NSBundle mainBundle]
-                  URLForResource: @"demo2" withExtension:@"mp4"];
-    [self launchVideoWithURL:url];
+    // Parc expo faible qualité
+    [self launchVideoWithName:@"demo2"];
 }
 
 - (IBAction)buttonZone5Touched:(id)sender {
-    NSURL *url = [[NSBundle mainBundle]
-                  URLForResource: @"demo" withExtension:@"mp4"];
-    [self launchVideoWithURL:url];
+    // Musée
+    [self launchVideoWithName:@"demo3"];
 }
 
 - (IBAction)buttonZone6Touched:(id)sender {
-    NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
-    NSString *basePath = ([paths count] > 0) ? [paths objectAtIndex:0] : nil;
-    NSString *pathInDocument = [NSString stringWithFormat:@"%@/demo2.mp4", basePath];
-    if(![[NSFileManager defaultManager] fileExistsAtPath:pathInDocument]) {
-        NSString *pathInBundle = [[NSBundle mainBundle] pathForResource:@"demo2" ofType:@"mp4"];
-        NSError *anyError = nil;
-        [[NSFileManager defaultManager] copyItemAtPath:pathInBundle toPath:pathInDocument error:&anyError];
-    }
-    
-    
-    NSURL *url = [[NSURL alloc] initFileURLWithPath:pathInDocument];
-    
-    [self launchVideoWithURL:url];
+    // Parc expo qualité normale
+   [self launchVideoWithName:@"demo4"];
 }
 
 

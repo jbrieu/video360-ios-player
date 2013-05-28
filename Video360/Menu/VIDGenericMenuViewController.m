@@ -9,7 +9,7 @@
 #import "VIDGenericMenuViewController.h"
 #import "VIDVideoPlayerViewController.h"
 
-#define DIAPORAMA_DELAY 2.0
+#define DIAPORAMA_DELAY 1.5 // delay between slide image in seconds
 
 @interface VIDGenericMenuViewController ()
 {
@@ -60,8 +60,10 @@
 }
 
 #pragma mark launch actions
--(void) launchVideoWithURL:(NSURL*)url
+-(void) launchVideoWithName:(NSString*)name;
 {
+    NSString *path = [[NSBundle mainBundle] pathForResource:name ofType:@"mp4"];
+    NSURL *url = [[NSURL alloc] initFileURLWithPath:path];
     VIDVideoPlayerViewController *videoController = [[VIDVideoPlayerViewController alloc] initWithNibName:@"VIDVideoPlayerViewController" bundle:nil url:url];
     
     if(![[self presentedViewController] isBeingDismissed])
