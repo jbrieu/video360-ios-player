@@ -7,7 +7,8 @@
 //
 
 #import <UIKit/UIKit.h>
+#import "VIDGenericMenuViewController.h"
 
-@interface VIDMenu2ViewController : UIViewController
+@interface VIDMenu2ViewController : VIDGenericMenuViewController
 
 @end

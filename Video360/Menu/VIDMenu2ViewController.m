@@ -7,7 +7,7 @@
 //
 
 #import "VIDMenu2ViewController.h"
-#import "VIDVideoPlayerViewController.h"
+
 
 @interface VIDMenu2ViewController ()
 
@@ -19,31 +19,15 @@
 {
     self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
     if (self) {
-        // Custom initialization
+        self.imageNames = @[@"menu02_A_ipad.png", @"menu02_B_ipad.png", @"menu02_C_ipad.png"];
     }
     return self;
 }
 
-- (void)viewDidLoad
-{
-    [super viewDidLoad];
-    // Do any additional setup after loading the view from its nib.
-}
-
-- (void)didReceiveMemoryWarning
-{
-    [super didReceiveMemoryWarning];
-    // Dispose of any resources that can be recreated.
-}
-
-- (void)viewDidUnload {
-    [super viewDidUnload];
-}
 
 #pragma mark button management
 - (IBAction)buttonZone7Touched:(id)sender {
-    NSURL *url = [NSURL URLWithString:@"http://www.apple.com"];
-    [[UIApplication sharedApplication] openURL:url];
+    [self openURLWithString:@"http://www.google.fr"];
 }
 
 
@@ -53,20 +37,9 @@
 
 
 - (IBAction)buttonZone9Touched:(id)sender {
-    NSURL *url = [NSURL URLWithString:@"http://www.microsoft.com"];
-    [[UIApplication sharedApplication] openURL:url];
+    [self openURLWithString:@"http://www.microsoft.com"];
 }
 
 
-#pragma mark launch actions
--(void) launchVideoWithURL:(NSURL*)url
-{
-    VIDVideoPlayerViewController *videoController = [[VIDVideoPlayerViewController alloc] initWithNibName:@"VIDVideoPlayerViewController" bundle:nil url:url];
-    
-    if(![[self presentedViewController] isBeingDismissed])
-    {
-        [self presentViewController:videoController animated:YES completion:nil];
-    }
-}
 
 @end

@@ -7,11 +7,10 @@
 //
 
 #import "VIDMenuViewController.h"
-#import "VIDVideoPlayerViewController.h"
+
 #import "VIDMenu2ViewController.h"
 
 @interface VIDMenuViewController ()
-
 
 @end
 
@@ -21,16 +20,11 @@
 {
     self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
     if (self) {
-        // Custom initialization
+        self.imageNames = @[@"menu01_A_ipad.png", @"menu01_B_ipad.png", @"menu01_C_ipad.png"];
     }
     return self;
 }
 
-- (void)viewDidLoad
-{
-    [super viewDidLoad];
-    // Do any additional setup after loading the view from its nib.
-}
 
 - (void)didReceiveMemoryWarning
 {
@@ -39,14 +33,17 @@
 }
 
 - (void)viewDidUnload {
+    [self setBackgroundImage:nil];
     [super viewDidUnload];
 }
+
+
 
 #pragma mark button management
 - (IBAction)buttonZone1Touched:(id)sender {
     NSURL *url = [[NSBundle mainBundle]
                   URLForResource: @"demo" withExtension:@"mp4"];
-    [self launchVideoWithURL:url];    
+    [self launchVideoWithURL:url];
 }
 
 - (IBAction)buttonZone2Touched:(id)sender {
@@ -56,19 +53,19 @@
     {
         [self presentViewController:menu2Controller animated:YES completion:nil];
     }
-
+    
 }
 
+
+
 - (IBAction)buttonZone3Touched:(id)sender {
-    NSURL *url = [NSURL URLWithString:@"http://www.google.fr"];
-    [[UIApplication sharedApplication] openURL:url];
+    [self openURLWithString:@"http://www.google.fr"];
 }
 
 - (IBAction)buttonZone4Touched:(id)sender {
     NSURL *url = [[NSBundle mainBundle]
                   URLForResource: @"demo2" withExtension:@"mp4"];
     [self launchVideoWithURL:url];
-    
 }
 
 - (IBAction)buttonZone5Touched:(id)sender {
@@ -78,22 +75,23 @@
 }
 
 - (IBAction)buttonZone6Touched:(id)sender {
-    NSString *path = [[NSBundle mainBundle] pathForResource:@"demo2" ofType:@"mp4"];
-    NSURL *url = [[NSURL alloc] initFileURLWithPath:path];
+    NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
+    NSString *basePath = ([paths count] > 0) ? [paths objectAtIndex:0] : nil;
+    NSString *pathInDocument = [NSString stringWithFormat:@"%@/demo2.mp4", basePath];
+    if(![[NSFileManager defaultManager] fileExistsAtPath:pathInDocument]) {
+        NSString *pathInBundle = [[NSBundle mainBundle] pathForResource:@"demo2" ofType:@"mp4"];
+        NSError *anyError = nil;
+        [[NSFileManager defaultManager] copyItemAtPath:pathInBundle toPath:pathInDocument error:&anyError];
+    }
+    
+    
+    NSURL *url = [[NSURL alloc] initFileURLWithPath:pathInDocument];
+    
     [self launchVideoWithURL:url];
 }
 
 
 
-#pragma mark launch actions
--(void) launchVideoWithURL:(NSURL*)url
-{
-    VIDVideoPlayerViewController *videoController = [[VIDVideoPlayerViewController alloc] initWithNibName:@"VIDVideoPlayerViewController" bundle:nil url:url];
 
-    if(![[self presentedViewController] isBeingDismissed])
-    {
-        [self presentViewController:videoController animated:YES completion:nil];
-    }
-}
 
 @end
