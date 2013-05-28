@@ -90,7 +90,7 @@ GLint uniforms[NUM_UNIFORMS];
     singleTapRecognizer.numberOfTapsRequired = 1;
     [view addGestureRecognizer:singleTapRecognizer];
     
-    self.preferredFramesPerSecond = 60.0f;
+    self.preferredFramesPerSecond = 30.0f;
     
     _overture = DEFAULT_OVERTURE;
     
