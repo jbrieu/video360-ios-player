@@ -307,7 +307,7 @@ static void *AVPlayerItemStatusContext = &AVPlayerItemStatusContext;
 
 -(void)disablePlayerButtons
 {
-    _playButton.enabled = YES;
+    _playButton.enabled = NO;
 }
 -(void)configureControleBackgroundView
 {
