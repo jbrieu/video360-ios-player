@@ -15,7 +15,16 @@
 {
     self.window = [[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
 
-    self.viewController = [[VIDMenuViewController alloc] initWithNibName:@"VIDMenuViewController" bundle:nil];
+    
+    CGRect screenBounds = [[UIScreen mainScreen] bounds];
+    if (screenBounds.size.height == 568) {
+        // iPhone 5 and more (?)
+        self.viewController = [[VIDMenuViewController alloc] initWithNibName:@"VIDMenuViewController_4inch" bundle:[NSBundle mainBundle]];
+    } else {
+        // iPhone 4 and under
+        self.viewController = [[VIDMenuViewController alloc] initWithNibName:@"VIDMenuViewController" bundle:[NSBundle mainBundle]];
+    }
+    
 
     self.window.rootViewController = self.viewController;
     [self.window makeKeyAndVisible];

@@ -10,6 +10,10 @@
 		010922E317555B23002B4E43 /* demo2.mp4 in Resources */ = {isa = PBXBuildFile; fileRef = 010922E217555B23002B4E43 /* demo2.mp4 */; };
 		010922E717555D0E002B4E43 /* demo4.mp4 in Resources */ = {isa = PBXBuildFile; fileRef = 010922E617555D0E002B4E43 /* demo4.mp4 */; };
 		010922E917555E41002B4E43 /* demo3.mp4 in Resources */ = {isa = PBXBuildFile; fileRef = 010922E817555E41002B4E43 /* demo3.mp4 */; };
+		010922EC17569518002B4E43 /* VIDMenu2ViewController~ipad.xib in Resources */ = {isa = PBXBuildFile; fileRef = 010922EA17569518002B4E43 /* VIDMenu2ViewController~ipad.xib */; };
+		010922ED17569518002B4E43 /* VIDMenuViewController~ipad.xib in Resources */ = {isa = PBXBuildFile; fileRef = 010922EB17569518002B4E43 /* VIDMenuViewController~ipad.xib */; };
+		010922EF17569A82002B4E43 /* VIDMenuViewController_4inch.xib in Resources */ = {isa = PBXBuildFile; fileRef = 010922EE17569A82002B4E43 /* VIDMenuViewController_4inch.xib */; };
+		010922F11756A203002B4E43 /* VIDMenu2ViewController_4inch.xib in Resources */ = {isa = PBXBuildFile; fileRef = 010922F01756A203002B4E43 /* VIDMenu2ViewController_4inch.xib */; };
 		010BD46F175212B2004FA712 /* VIDMenuViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 010BD46D175212B2004FA712 /* VIDMenuViewController.m */; };
 		010BD470175212B2004FA712 /* VIDMenuViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 010BD46E175212B2004FA712 /* VIDMenuViewController.xib */; };
 		010BD47617521D02004FA712 /* demo.mp4 in Resources */ = {isa = PBXBuildFile; fileRef = 010BD47417521D02004FA712 /* demo.mp4 */; };
@@ -77,6 +81,10 @@
 		010922E217555B23002B4E43 /* demo2.mp4 */ = {isa = PBXFileReference; lastKnownFileType = file; path = demo2.mp4; sourceTree = "<group>"; };
 		010922E617555D0E002B4E43 /* demo4.mp4 */ = {isa = PBXFileReference; lastKnownFileType = file; path = demo4.mp4; sourceTree = "<group>"; };
 		010922E817555E41002B4E43 /* demo3.mp4 */ = {isa = PBXFileReference; lastKnownFileType = file; path = demo3.mp4; sourceTree = "<group>"; };
+		010922EA17569518002B4E43 /* VIDMenu2ViewController~ipad.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = "VIDMenu2ViewController~ipad.xib"; sourceTree = "<group>"; };
+		010922EB17569518002B4E43 /* VIDMenuViewController~ipad.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = "VIDMenuViewController~ipad.xib"; sourceTree = "<group>"; };
+		010922EE17569A82002B4E43 /* VIDMenuViewController_4inch.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = VIDMenuViewController_4inch.xib; sourceTree = "<group>"; };
+		010922F01756A203002B4E43 /* VIDMenu2ViewController_4inch.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = VIDMenu2ViewController_4inch.xib; sourceTree = "<group>"; };
 		010BD46C175212B2004FA712 /* VIDMenuViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = VIDMenuViewController.h; sourceTree = "<group>"; };
 		010BD46D175212B2004FA712 /* VIDMenuViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = VIDMenuViewController.m; sourceTree = "<group>"; };
 		010BD46E175212B2004FA712 /* VIDMenuViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = VIDMenuViewController.xib; sourceTree = "<group>"; };
@@ -316,6 +324,8 @@
 				010BD46C175212B2004FA712 /* VIDMenuViewController.h */,
 				010BD46D175212B2004FA712 /* VIDMenuViewController.m */,
 				010BD46E175212B2004FA712 /* VIDMenuViewController.xib */,
+				010922EE17569A82002B4E43 /* VIDMenuViewController_4inch.xib */,
+				010922EB17569518002B4E43 /* VIDMenuViewController~ipad.xib */,
 			);
 			name = Menu1;
 			sourceTree = "<group>";
@@ -326,6 +336,8 @@
 				018DC6111752703500277E91 /* VIDMenu2ViewController.h */,
 				018DC6121752703500277E91 /* VIDMenu2ViewController.m */,
 				018DC6131752703500277E91 /* VIDMenu2ViewController.xib */,
+				010922F01756A203002B4E43 /* VIDMenu2ViewController_4inch.xib */,
+				010922EA17569518002B4E43 /* VIDMenu2ViewController~ipad.xib */,
 			);
 			name = Menu2;
 			sourceTree = "<group>";
@@ -481,6 +493,10 @@
 				010922E317555B23002B4E43 /* demo2.mp4 in Resources */,
 				010922E717555D0E002B4E43 /* demo4.mp4 in Resources */,
 				010922E917555E41002B4E43 /* demo3.mp4 in Resources */,
+				010922EC17569518002B4E43 /* VIDMenu2ViewController~ipad.xib in Resources */,
+				010922ED17569518002B4E43 /* VIDMenuViewController~ipad.xib in Resources */,
+				010922EF17569A82002B4E43 /* VIDMenuViewController_4inch.xib in Resources */,
+				010922F11756A203002B4E43 /* VIDMenu2ViewController_4inch.xib in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

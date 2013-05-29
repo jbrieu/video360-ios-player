@@ -39,10 +39,10 @@
 					<object class="IBUIImageView" id="1045712864">
 						<reference key="NSNextResponder" ref="277664679"/>
 						<int key="NSvFlags">274</int>
-						<string key="NSFrameSize">{480, 320}</string>
+						<string key="NSFrameSize">{1024, 768}</string>
 						<reference key="NSSuperview" ref="277664679"/>
 						<reference key="NSWindow"/>
-						<reference key="NSNextKeyView" ref="786993547"/>
+						<reference key="NSNextKeyView" ref="958082685"/>
 						<string key="NSReuseIdentifierKey">_NS:9</string>
 						<bool key="IBUIUserInteractionEnabled">NO</bool>
 						<string key="targetRuntimeIdentifier">IBIPadFramework</string>
@@ -54,10 +54,9 @@
 					<object class="IBUIButton" id="1007423481">
 						<reference key="NSNextResponder" ref="277664679"/>
 						<int key="NSvFlags">292</int>
-						<string key="NSFrame">{{0, 195}, {480, 125}}</string>
+						<string key="NSFrame">{{0, 468}, {1024, 300}}</string>
 						<reference key="NSSuperview" ref="277664679"/>
 						<reference key="NSWindow"/>
-						<reference key="NSNextKeyView"/>
 						<string key="NSReuseIdentifierKey">_NS:9</string>
 						<object class="NSColor" key="IBUIBackgroundColor" id="198556699">
 							<int key="NSColorSpace">3</int>
@@ -95,10 +94,10 @@
 					<object class="IBUIButton" id="958082685">
 						<reference key="NSNextResponder" ref="277664679"/>
 						<int key="NSvFlags">292</int>
-						<string key="NSFrame">{{268, 13}, {80, 25}}</string>
+						<string key="NSFrame">{{571, 31}, {168, 58}}</string>
 						<reference key="NSSuperview" ref="277664679"/>
 						<reference key="NSWindow"/>
-						<reference key="NSNextKeyView" ref="1007423481"/>
+						<reference key="NSNextKeyView" ref="786993547"/>
 						<string key="NSReuseIdentifierKey">_NS:9</string>
 						<reference key="IBUIBackgroundColor" ref="198556699"/>
 						<bool key="IBUIOpaque">NO</bool>
@@ -121,10 +120,10 @@
 					<object class="IBUIButton" id="786993547">
 						<reference key="NSNextResponder" ref="277664679"/>
 						<int key="NSvFlags">292</int>
-						<string key="NSFrame">{{375, 13}, {80, 25}}</string>
+						<string key="NSFrame">{{801, 31}, {168, 58}}</string>
 						<reference key="NSSuperview" ref="277664679"/>
 						<reference key="NSWindow"/>
-						<reference key="NSNextKeyView" ref="958082685"/>
+						<reference key="NSNextKeyView" ref="1007423481"/>
 						<string key="NSReuseIdentifierKey">_NS:9</string>
 						<reference key="IBUIBackgroundColor" ref="198556699"/>
 						<bool key="IBUIOpaque">NO</bool>
@@ -145,7 +144,7 @@
 						<reference key="IBUIFont" ref="105839753"/>
 					</object>
 				</array>
-				<string key="NSFrameSize">{480, 320}</string>
+				<string key="NSFrameSize">{1024, 768}</string>
 				<reference key="NSSuperview"/>
 				<reference key="NSWindow"/>
 				<reference key="NSNextKeyView" ref="1045712864"/>
@@ -158,6 +157,23 @@
 				<object class="IBUISimulatedOrientationMetrics" key="IBUISimulatedOrientationMetrics">
 					<int key="IBUIInterfaceOrientation">3</int>
 					<int key="interfaceOrientation">3</int>
+				</object>
+				<object class="IBUIScreenMetrics" key="IBUISimulatedDestinationMetrics">
+					<string key="IBUISimulatedSizeMetricsClass">IBUIScreenMetrics</string>
+					<object class="NSMutableDictionary" key="IBUINormalizedOrientationToSizeMap">
+						<bool key="EncodedWithXMLCoder">YES</bool>
+						<array key="dict.sortedKeys">
+							<integer value="1"/>
+							<integer value="3"/>
+						</array>
+						<array key="dict.values">
+							<string>{768, 1024}</string>
+							<string>{1024, 768}</string>
+						</array>
+					</object>
+					<string key="IBUITargetRuntime">IBIPadFramework</string>
+					<string key="IBUIDisplayName">iPad Full Screen</string>
+					<int key="IBUIType">1</int>
 				</object>
 				<string key="targetRuntimeIdentifier">IBIPadFramework</string>
 			</object>
@@ -233,8 +249,8 @@
 						<array class="NSMutableArray" key="children">
 							<reference ref="1045712864"/>
 							<reference ref="1007423481"/>
-							<reference ref="786993547"/>
 							<reference ref="958082685"/>
+							<reference ref="786993547"/>
 						</array>
 						<reference key="parent" ref="0"/>
 					</object>
@@ -308,6 +324,25 @@
 				<object class="IBPartialClassDescription">
 					<string key="className">VIDMenu2ViewController</string>
 					<string key="superclassName">VIDGenericMenuViewController</string>
+					<dictionary class="NSMutableDictionary" key="actions">
+						<string key="buttonZone7Touched:">id</string>
+						<string key="buttonZone8Touched:">id</string>
+						<string key="buttonZone9Touched:">id</string>
+					</dictionary>
+					<dictionary class="NSMutableDictionary" key="actionInfosByName">
+						<object class="IBActionInfo" key="buttonZone7Touched:">
+							<string key="name">buttonZone7Touched:</string>
+							<string key="candidateClassName">id</string>
+						</object>
+						<object class="IBActionInfo" key="buttonZone8Touched:">
+							<string key="name">buttonZone8Touched:</string>
+							<string key="candidateClassName">id</string>
+						</object>
+						<object class="IBActionInfo" key="buttonZone9Touched:">
+							<string key="name">buttonZone9Touched:</string>
+							<string key="candidateClassName">id</string>
+						</object>
+					</dictionary>
 					<object class="IBClassDescriptionSource" key="sourceIdentifier">
 						<string key="majorKey">IBProjectSource</string>
 						<string key="minorKey">./Classes/VIDMenu2ViewController.h</string>
