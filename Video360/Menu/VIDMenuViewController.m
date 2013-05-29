@@ -69,7 +69,7 @@
     VIDMenu2ViewController *menu2Controller;
     CGRect screenBounds = [[UIScreen mainScreen] bounds];
     if (screenBounds.size.height == 568) {
-        // iPhone 5 and more (?)
+        // iPhone 5 and more (?) 4 inch
        menu2Controller = [[VIDMenu2ViewController alloc] initWithNibName:@"VIDMenu2ViewController_4inch" bundle:[NSBundle mainBundle]];
     } else {
         // iPhone 4 and under

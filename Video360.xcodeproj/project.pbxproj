@@ -14,6 +14,7 @@
 		010922ED17569518002B4E43 /* VIDMenuViewController~ipad.xib in Resources */ = {isa = PBXBuildFile; fileRef = 010922EB17569518002B4E43 /* VIDMenuViewController~ipad.xib */; };
 		010922EF17569A82002B4E43 /* VIDMenuViewController_4inch.xib in Resources */ = {isa = PBXBuildFile; fileRef = 010922EE17569A82002B4E43 /* VIDMenuViewController_4inch.xib */; };
 		010922F11756A203002B4E43 /* VIDMenu2ViewController_4inch.xib in Resources */ = {isa = PBXBuildFile; fileRef = 010922F01756A203002B4E43 /* VIDMenu2ViewController_4inch.xib */; };
+		010922F31756A869002B4E43 /* VIDVideoPlayerViewController~ipad.xib in Resources */ = {isa = PBXBuildFile; fileRef = 010922F21756A869002B4E43 /* VIDVideoPlayerViewController~ipad.xib */; };
 		010BD46F175212B2004FA712 /* VIDMenuViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 010BD46D175212B2004FA712 /* VIDMenuViewController.m */; };
 		010BD470175212B2004FA712 /* VIDMenuViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 010BD46E175212B2004FA712 /* VIDMenuViewController.xib */; };
 		010BD47617521D02004FA712 /* demo.mp4 in Resources */ = {isa = PBXBuildFile; fileRef = 010BD47417521D02004FA712 /* demo.mp4 */; };
@@ -85,6 +86,7 @@
 		010922EB17569518002B4E43 /* VIDMenuViewController~ipad.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = "VIDMenuViewController~ipad.xib"; sourceTree = "<group>"; };
 		010922EE17569A82002B4E43 /* VIDMenuViewController_4inch.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = VIDMenuViewController_4inch.xib; sourceTree = "<group>"; };
 		010922F01756A203002B4E43 /* VIDMenu2ViewController_4inch.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = VIDMenu2ViewController_4inch.xib; sourceTree = "<group>"; };
+		010922F21756A869002B4E43 /* VIDVideoPlayerViewController~ipad.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = "VIDVideoPlayerViewController~ipad.xib"; sourceTree = "<group>"; };
 		010BD46C175212B2004FA712 /* VIDMenuViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = VIDMenuViewController.h; sourceTree = "<group>"; };
 		010BD46D175212B2004FA712 /* VIDMenuViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = VIDMenuViewController.m; sourceTree = "<group>"; };
 		010BD46E175212B2004FA712 /* VIDMenuViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = VIDMenuViewController.xib; sourceTree = "<group>"; };
@@ -303,6 +305,7 @@
 				017325A9174FF70500DBE011 /* VIDVideoPlayerViewController.h */,
 				017325AA174FF70500DBE011 /* VIDVideoPlayerViewController.m */,
 				017325AB174FF70500DBE011 /* VIDVideoPlayerViewController.xib */,
+				010922F21756A869002B4E43 /* VIDVideoPlayerViewController~ipad.xib */,
 			);
 			path = VideoPlayer;
 			sourceTree = "<group>";
@@ -497,6 +500,7 @@
 				010922ED17569518002B4E43 /* VIDMenuViewController~ipad.xib in Resources */,
 				010922EF17569A82002B4E43 /* VIDMenuViewController_4inch.xib in Resources */,
 				010922F11756A203002B4E43 /* VIDMenu2ViewController_4inch.xib in Resources */,
+				010922F31756A869002B4E43 /* VIDVideoPlayerViewController~ipad.xib in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

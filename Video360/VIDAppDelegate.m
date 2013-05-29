@@ -18,7 +18,7 @@
     
     CGRect screenBounds = [[UIScreen mainScreen] bounds];
     if (screenBounds.size.height == 568) {
-        // iPhone 5 and more (?)
+        // iPhone 5 and more (?) 4 inch
         self.viewController = [[VIDMenuViewController alloc] initWithNibName:@"VIDMenuViewController_4inch" bundle:[NSBundle mainBundle]];
     } else {
         // iPhone 4 and under

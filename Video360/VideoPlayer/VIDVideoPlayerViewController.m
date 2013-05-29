@@ -114,6 +114,15 @@ static void *AVPlayerItemStatusContext = &AVPlayerItemStatusContext;
     
     _player = [[AVPlayer alloc] init];
     
+    // Do not take mute button into account
+    NSError *error = nil;
+    BOOL success = [[AVAudioSession sharedInstance]
+                    setCategory:AVAudioSessionCategoryPlayback
+                    error:&error];
+    if (!success) {
+        NSLog(@"Could not use AVAudioSessionCategoryPlayback", nil);
+    }
+    
     AVURLAsset *asset = [AVURLAsset URLAssetWithURL:url options:nil];
     
     if(![[NSFileManager defaultManager] fileExistsAtPath:[[asset URL] path]]) {
@@ -225,7 +234,7 @@ static void *AVPlayerItemStatusContext = &AVPlayerItemStatusContext;
 #pragma mark play button management
 -(void)configurePlayButton
 {
-    _playButton.frame = CGRectMake(_playerControlBackgroundView.bounds.size.width * 0.5 - 20, 10, 40, 40);
+//    _playButton.frame = CGRectMake(_playerControlBackgroundView.bounds.size.width * 0.5 - 20, 10, 40, 40);
     _playButton.backgroundColor = [UIColor clearColor];
     _playButton.showsTouchWhenHighlighted = YES;
     
@@ -282,8 +291,8 @@ static void *AVPlayerItemStatusContext = &AVPlayerItemStatusContext;
 #pragma mark progress slider management
 -(void) configureProgressSlider
 {
-    _progressSlider.center = CGPointMake(_playerControlBackgroundView.bounds.size.width * 0.5, _playerControlBackgroundView.bounds.size.height - 20.0);
-    _progressSlider.autoresizingMask = UIViewAutoresizingFlexibleWidth;
+//    _progressSlider.center = CGPointMake(_playerControlBackgroundView.bounds.size.width * 0.5, _playerControlBackgroundView.bounds.size.height - 20.0);
+//    _progressSlider.autoresizingMask = UIViewAutoresizingFlexibleWidth;
     _progressSlider.continuous = NO;
     _progressSlider.value = 0;
     
@@ -292,7 +301,7 @@ static void *AVPlayerItemStatusContext = &AVPlayerItemStatusContext;
 #pragma mark back button management
 -(void) configureBackButton
 {
-    _backButton.frame = CGRectMake(15, 15, 31, 31);
+//    _backButton.frame = CGRectMake(15, 15, 31, 31);
     _backButton.backgroundColor = [UIColor clearColor];
     _backButton.showsTouchWhenHighlighted = YES;
     
@@ -311,19 +320,18 @@ static void *AVPlayerItemStatusContext = &AVPlayerItemStatusContext;
 }
 -(void)configureControleBackgroundView
 {
-    CGFloat parentWidth = self.view.bounds.size.width;
-    CGFloat parentHeight = self.view.bounds.size.height;
-    
-    CGFloat width  = parentWidth /3 ;
-    CGFloat height = parentHeight / 8;
-    
-    CGFloat x = parentWidth / 2 - width / 2 ;
-    CGFloat y = parentHeight - height * 2 ;
+//    CGFloat parentWidth = self.view.bounds.size.width;
+//    CGFloat parentHeight = self.view.bounds.size.height;
+//    
+//    CGFloat width  = parentWidth /3 ;
+//    CGFloat height = parentHeight / 8;
+//    
+//    CGFloat x = parentWidth / 2 - width / 2 ;
+//    CGFloat y = parentHeight - height * 2 ;
+//    
+//    _playerControlBackgroundView.frame = CGRectMake(x, y, width, height);
     
     _playerControlBackgroundView.layer.cornerRadius = 8;
-    
-    _playerControlBackgroundView.frame = CGRectMake(x, y, width, height);
-    
     
 }
 
