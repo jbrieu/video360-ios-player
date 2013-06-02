@@ -17,7 +17,8 @@
 #define MIN_OVERTURE 25.0
 #define DEFAULT_OVERTURE 85.0
 
-static const NSTimeInterval accelerometerMin = 0.01;
+
+#define ROLL_CORRECTION 1.43
 
 // Color Conversion Constants (YUV to RGB) including adjustment from 16-235/16-240 (video range)
 
@@ -104,7 +105,6 @@ GLint uniforms[NUM_UNIFORMS];
     
     [self setupGL];
     
-    [self startDeviceMotion];
     
 }
 
@@ -233,13 +233,27 @@ GLint uniforms[NUM_UNIFORMS];
     motionManager.showsDeviceMovementDisplay = YES;
 	[motionManager startDeviceMotionUpdatesUsingReferenceFrame:CMAttitudeReferenceFrameXArbitraryCorrectedZVertical];
     
-    _isUsingMotion = NO;
+    _isUsingMotion = YES;
+    
+
 }
 
 - (void)stopDeviceMotion
 {
+    
+    if(_isUsingMotion)
+    {
+        CMDeviceMotion *d = motionManager.deviceMotion;
+        if (d != nil) {
+            _fingerRotationX = d.attitude.roll + ROLL_CORRECTION;
+            _fingerRotationY = -d.attitude.pitch;
+        }
+    }
+    
+    _isUsingMotion = NO;
 	[motionManager stopDeviceMotionUpdates];
 	motionManager = nil;
+    
 }
 
 
@@ -261,7 +275,7 @@ GLint uniforms[NUM_UNIFORMS];
             modelViewMatrix = GLKMatrix4Rotate(modelViewMatrix, d.attitude.roll, 1.0f, 0.0f, 0.0f);
             modelViewMatrix = GLKMatrix4Rotate(modelViewMatrix,  -d.attitude.pitch, 0.0f, 1.0f, 0.0f);
             modelViewMatrix = GLKMatrix4Rotate(modelViewMatrix, -d.attitude.yaw, 0.0f, 0.0f, 1.0f);
-            modelViewMatrix = GLKMatrix4Rotate(modelViewMatrix, 1.43, 1.0f, 0.0f, 0.0f); // correction up/down
+            modelViewMatrix = GLKMatrix4Rotate(modelViewMatrix, ROLL_CORRECTION, 1.0f, 0.0f, 0.0f);
         }
         
     }

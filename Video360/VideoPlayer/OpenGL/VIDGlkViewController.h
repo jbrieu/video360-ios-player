@@ -13,6 +13,9 @@
 @interface VIDGlkViewController : GLKViewController<UIGestureRecognizerDelegate>
 
 @property (strong, nonatomic, readwrite) VIDVideoPlayerViewController* videoPlayerController;
-@property (assign, nonatomic, readwrite) BOOL isUsingMotion;
+@property (assign, nonatomic, readonly) BOOL isUsingMotion;
+
+- (void)startDeviceMotion;
+- (void)stopDeviceMotion;
 
 @end
