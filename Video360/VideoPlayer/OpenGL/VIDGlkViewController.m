@@ -245,8 +245,8 @@ GLint uniforms[NUM_UNIFORMS];
     {
         CMDeviceMotion *d = motionManager.deviceMotion;
         if (d != nil) {
-            _fingerRotationX = d.attitude.roll + ROLL_CORRECTION;
-            _fingerRotationY = -d.attitude.pitch;
+            _fingerRotationX = _fingerRotationX + d.attitude.roll + ROLL_CORRECTION;
+            _fingerRotationY = _fingerRotationY -d.attitude.pitch;
         }
     }
     
