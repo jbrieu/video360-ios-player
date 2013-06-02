@@ -230,7 +230,7 @@ GLint uniforms[NUM_UNIFORMS];
 {
 	motionManager = [[CMMotionManager alloc] init];
 	motionManager.deviceMotionUpdateInterval = 1.0 / 60.0;
-	[motionManager startDeviceMotionUpdatesUsingReferenceFrame:CMAttitudeReferenceFrameXTrueNorthZVertical];
+	[motionManager startDeviceMotionUpdatesUsingReferenceFrame:CMAttitudeReferenceFrameXArbitraryZVertical];
     
     _isUsingMotion = NO;
 }
