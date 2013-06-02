@@ -294,6 +294,10 @@ static void *AVPlayerItemStatusContext = &AVPlayerItemStatusContext;
     _progressSlider.continuous = NO;
     _progressSlider.value = 0;
     
+    [_progressSlider setThumbImage:[UIImage imageNamed:@"thumb.png"] forState:UIControlStateNormal];
+    [_progressSlider setThumbImage:[UIImage imageNamed:@"thumb.png"] forState:UIControlStateHighlighted];
+
+    
 }
 
 #pragma mark back and gyro button management
