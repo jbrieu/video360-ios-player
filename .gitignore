@@ -17,3 +17,6 @@ build/*
 *.pbxuser
 project.xcworkspace
 xcuserdata
+
+#Exclude Video files (too heavy)
+*.mp4
