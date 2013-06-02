@@ -45,8 +45,8 @@ static void *AVPlayerItemStatusContext = &AVPlayerItemStatusContext;
 @property (strong, nonatomic) IBOutlet UIView *playerControlBackgroundView;
 @property (strong, nonatomic) IBOutlet UIButton *playButton;
 @property (strong, nonatomic) IBOutlet UISlider *progressSlider;
-
 @property (strong, nonatomic) IBOutlet UIButton *backButton;
+@property (strong, nonatomic) IBOutlet UIButton *gyroButton;
 
 @end
 
@@ -72,6 +72,7 @@ static void *AVPlayerItemStatusContext = &AVPlayerItemStatusContext;
     [self configureProgressSlider];
     [self configureControleBackgroundView];
     [self configureBackButton];
+    [self configureGyroButton];
 }
 
 
@@ -100,7 +101,6 @@ static void *AVPlayerItemStatusContext = &AVPlayerItemStatusContext;
 }
 
 #pragma mark video setting
-#warning TODO : porter sur iOS5
 
 -(void)setupVideoPlaybackForURL:(NSURL*)url
 {
@@ -296,13 +296,21 @@ static void *AVPlayerItemStatusContext = &AVPlayerItemStatusContext;
     
 }
 
-#pragma mark back button management
+#pragma mark back and gyro button management
 -(void) configureBackButton
 {
     _backButton.backgroundColor = [UIColor clearColor];
     _backButton.showsTouchWhenHighlighted = YES;
     
 }
+
+-(void) configureGyroButton
+{
+    _gyroButton.backgroundColor = [UIColor clearColor];
+    _gyroButton.showsTouchWhenHighlighted = YES;
+    
+}
+
 
 #pragma mark controls management
 
@@ -650,6 +658,15 @@ static void *AVPlayerItemStatusContext = &AVPlayerItemStatusContext;
      to play it again. */
     seekToZeroBeforePlay = YES;
 }
+
+#pragma mark gyro button
+- (IBAction)gyroButtonTouched:(id)sender {
+    _glkViewController.isUsingMotion = !_glkViewController.isUsingMotion;
+    
+    _gyroButton.selected = _glkViewController.isUsingMotion;    
+}
+
+
 
 #pragma mark back button
 - (IBAction)backButtonTouched:(id)sender {
