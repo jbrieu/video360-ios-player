@@ -290,7 +290,6 @@
 			children = (
 				018DC6181752765E00277E91 /* PlayerImages */,
 				010BD47317521D02004FA712 /* EmbeddedVideos */,
-				01FE30E117520890000F8296 /* MenuImages */,
 				012C6766174A08CA0098A148 /* Shader.vsh */,
 				012C6765174A08CA0098A148 /* Shader.fsh */,
 				0133018A174ECA4200E9E487 /* sphere5.h */,
@@ -336,6 +335,7 @@
 		018DC6171752704E00277E91 /* Menu2 */ = {
 			isa = PBXGroup;
 			children = (
+				01FE30E117520890000F8296 /* MenuImages */,
 				018DC6111752703500277E91 /* VIDMenu2ViewController.h */,
 				018DC6121752703500277E91 /* VIDMenu2ViewController.m */,
 				018DC6131752703500277E91 /* VIDMenu2ViewController.xib */,
@@ -390,7 +390,8 @@
 				018DC6361754C69400277E91 /* Menu1 */,
 				018DC6371754C69A00277E91 /* Menu2 */,
 			);
-			path = MenuImages;
+			name = MenuImages;
+			path = ../Resources/MenuImages;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
