@@ -230,7 +230,8 @@ GLint uniforms[NUM_UNIFORMS];
 {
 	motionManager = [[CMMotionManager alloc] init];
 	motionManager.deviceMotionUpdateInterval = 1.0 / 60.0;
-	[motionManager startDeviceMotionUpdatesUsingReferenceFrame:CMAttitudeReferenceFrameXArbitraryZVertical];
+    motionManager.showsDeviceMovementDisplay = YES;
+	[motionManager startDeviceMotionUpdatesUsingReferenceFrame:CMAttitudeReferenceFrameXArbitraryCorrectedZVertical];
     
     _isUsingMotion = NO;
 }
@@ -252,21 +253,20 @@ GLint uniforms[NUM_UNIFORMS];
                                                             0.1f,
                                                             400.0f);
     GLKMatrix4 modelViewMatrix = GLKMatrix4Identity;
+    modelViewMatrix = GLKMatrix4Scale(modelViewMatrix, 300.0, 300.0, 300.0);
+    
     if(_isUsingMotion)
     {
         CMDeviceMotion *d = motionManager.deviceMotion;
         if (d != nil) {
-            float orientationMultiplier = ([[UIDevice currentDevice] orientation] == UIDeviceOrientationLandscapeLeft) ? 1.0f: 1.0f;
 
-            if([[UIDevice currentDevice] orientation])
-            modelViewMatrix = GLKMatrix4Rotate(modelViewMatrix, orientationMultiplier*d.attitude.roll, 1.0f, 0.0f, 0.0f);
-            modelViewMatrix = GLKMatrix4Rotate(modelViewMatrix, orientationMultiplier*d.attitude.pitch, 0.0f, 1.0f, 0.0f);
-            modelViewMatrix = GLKMatrix4Rotate(modelViewMatrix, orientationMultiplier*d.attitude.yaw, 0.0f, 0.0f, 1.0f);
+            modelViewMatrix = GLKMatrix4Rotate(modelViewMatrix, d.attitude.roll, 1.0f, 0.0f, 0.0f);
+            modelViewMatrix = GLKMatrix4Rotate(modelViewMatrix, -d.attitude.pitch, 0.0f, 1.0f, 0.0f);
+            modelViewMatrix = GLKMatrix4Rotate(modelViewMatrix, -d.attitude.yaw, 0.0f, 0.0f, 1.0f);
         }
         
     }
     
-    modelViewMatrix = GLKMatrix4Scale(modelViewMatrix, 300.0, 300.0, 300.0);
     modelViewMatrix = GLKMatrix4Rotate(modelViewMatrix, _fingerRotationX, 1.0f, 0.0f, 0.0f);
     modelViewMatrix = GLKMatrix4Rotate(modelViewMatrix, _fingerRotationY, 0.0f, 1.0f, 0.0f);
 
