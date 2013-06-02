@@ -261,6 +261,7 @@ GLint uniforms[NUM_UNIFORMS];
             modelViewMatrix = GLKMatrix4Rotate(modelViewMatrix, d.attitude.roll, 1.0f, 0.0f, 0.0f);
             modelViewMatrix = GLKMatrix4Rotate(modelViewMatrix,  -d.attitude.pitch, 0.0f, 1.0f, 0.0f);
             modelViewMatrix = GLKMatrix4Rotate(modelViewMatrix, -d.attitude.yaw, 0.0f, 0.0f, 1.0f);
+            modelViewMatrix = GLKMatrix4Rotate(modelViewMatrix, 1.43, 1.0f, 0.0f, 0.0f); // correction up/down
         }
         
     }
