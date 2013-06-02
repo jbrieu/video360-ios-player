@@ -10,11 +10,14 @@
 #import "sphere5.h"
 #import "GLProgram.h"
 #import "VIDVideoPlayerViewController.h"
+#import <CoreMotion/CoreMotion.h>
 
 
 #define MAX_OVERTURE 95.0
 #define MIN_OVERTURE 25.0
 #define DEFAULT_OVERTURE 85.0
+
+static const NSTimeInterval accelerometerMin = 0.01;
 
 // Color Conversion Constants (YUV to RGB) including adjustment from 16-235/16-240 (video range)
 
@@ -47,11 +50,12 @@ GLint uniforms[NUM_UNIFORMS];
     GLuint _vertexTexCoordID;
     GLuint _vertexTexCoordAttributeIndex;
     
-    float _rotationX;
-    float _rotationY;
+    float _fingerRotationX;
+    float _fingerRotationY;
     CGFloat _overture;
     
-       
+    CMMotionManager *motionManager;
+    
     CVOpenGLESTextureRef _lumaTexture;
     CVOpenGLESTextureRef _chromaTexture;
 	CVOpenGLESTextureCacheRef _videoTextureCache;
@@ -94,15 +98,20 @@ GLint uniforms[NUM_UNIFORMS];
     
     _overture = DEFAULT_OVERTURE;
     
+    
     // Set the default conversion to BT.709, which is the standard for HDTV.
     _preferredConversion = kColorConversion709;
     
     [self setupGL];
     
+    [self startDeviceMotion];
+    
 }
 
 - (void)dealloc
 {
+    [self stopDeviceMotion];
+    
     [self tearDownGL];
     
     if ([EAGLContext currentContext] == self.context) {
@@ -216,21 +225,51 @@ GLint uniforms[NUM_UNIFORMS];
 	CVOpenGLESTextureCacheFlush(_videoTextureCache, 0);
 }
 
+#pragma mark device motion management
+- (void)startDeviceMotion
+{
+	motionManager = [[CMMotionManager alloc] init];
+	motionManager.deviceMotionUpdateInterval = 1.0 / 60.0;
+	[motionManager startDeviceMotionUpdatesUsingReferenceFrame:CMAttitudeReferenceFrameXTrueNorthZVertical];
+    
+    _isUsingMotion = NO;
+}
+
+- (void)stopDeviceMotion
+{
+	[motionManager stopDeviceMotionUpdates];
+	motionManager = nil;
+}
+
+
 #pragma mark - GLKView and GLKViewController delegate methods
 
 - (void)update
-{
-    
+{        
     float aspect = fabsf(self.view.bounds.size.width / self.view.bounds.size.height);
     GLKMatrix4 projectionMatrix = GLKMatrix4MakePerspective(GLKMathDegreesToRadians(_overture),
                                                             aspect,
                                                             0.1f,
                                                             400.0f);
-    
     GLKMatrix4 modelViewMatrix = GLKMatrix4Identity;
+    if(_isUsingMotion)
+    {
+        CMDeviceMotion *d = motionManager.deviceMotion;
+        if (d != nil) {
+            float orientationMultiplier = ([[UIDevice currentDevice] orientation] == UIDeviceOrientationLandscapeLeft) ? 1.0f: 1.0f;
+
+            if([[UIDevice currentDevice] orientation])
+            modelViewMatrix = GLKMatrix4Rotate(modelViewMatrix, orientationMultiplier*d.attitude.roll, 1.0f, 0.0f, 0.0f);
+            modelViewMatrix = GLKMatrix4Rotate(modelViewMatrix, orientationMultiplier*d.attitude.pitch, 0.0f, 1.0f, 0.0f);
+            modelViewMatrix = GLKMatrix4Rotate(modelViewMatrix, orientationMultiplier*d.attitude.yaw, 0.0f, 0.0f, 1.0f);
+        }
+        
+    }
+    
     modelViewMatrix = GLKMatrix4Scale(modelViewMatrix, 300.0, 300.0, 300.0);
-    modelViewMatrix = GLKMatrix4Rotate(modelViewMatrix, _rotationX, 1.0f, 0.0f, 0.0f);
-    modelViewMatrix = GLKMatrix4Rotate(modelViewMatrix, _rotationY, 0.0f, 1.0f, 0.0f);
+    modelViewMatrix = GLKMatrix4Rotate(modelViewMatrix, _fingerRotationX, 1.0f, 0.0f, 0.0f);
+    modelViewMatrix = GLKMatrix4Rotate(modelViewMatrix, _fingerRotationY, 0.0f, 1.0f, 0.0f);
+
     
     
     _modelViewProjectionMatrix = GLKMatrix4Multiply(projectionMatrix, modelViewMatrix);
@@ -374,8 +413,8 @@ GLint uniforms[NUM_UNIFORMS];
     [touch previousLocationInView:touch.view].y;
     distX *= -0.005;
     distY *= -0.005;
-    _rotationX += distY *  _overture / 100;
-    _rotationY += distX *  _overture / 100;
+    _fingerRotationX += distY *  _overture / 100;
+    _fingerRotationY += distX *  _overture / 100;
 }
 - (void)touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event
 {
