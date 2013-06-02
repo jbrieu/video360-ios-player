@@ -271,7 +271,7 @@ GLint uniforms[NUM_UNIFORMS];
     if(_isUsingMotion)
     {
         CMDeviceMotion *d = motionManager.deviceMotion;
-        if (d != nil) {
+        if (d != nil) {            
             modelViewMatrix = GLKMatrix4Rotate(modelViewMatrix, d.attitude.roll, 1.0f, 0.0f, 0.0f);
             modelViewMatrix = GLKMatrix4Rotate(modelViewMatrix,  -d.attitude.pitch, 0.0f, 1.0f, 0.0f);
             modelViewMatrix = GLKMatrix4Rotate(modelViewMatrix, -d.attitude.yaw, 0.0f, 0.0f, 1.0f);
