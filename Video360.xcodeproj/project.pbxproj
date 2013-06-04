@@ -221,7 +221,6 @@
 		012C6698173A9F700098A148 = {
 			isa = PBXGroup;
 			children = (
-				018C682A175B71A700F2F6FF /* CoreMotion.framework */,
 				012C66AE173A9F700098A148 /* Video360 */,
 				012C66D9173A9F710098A148 /* Video360Tests */,
 				012C66A3173A9F700098A148 /* Frameworks */,
@@ -241,6 +240,7 @@
 		012C66A3173A9F700098A148 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				018C682A175B71A700F2F6FF /* CoreMotion.framework */,
 				012C66F4174050BC0098A148 /* CoreMedia.framework */,
 				012C66F2174050B70098A148 /* CoreVideo.framework */,
 				012C66EF174050810098A148 /* MobileCoreServices.framework */,

@@ -19,7 +19,8 @@ glTexCoordPointer(2, GL_FLOAT, 0, sphere5TexCoords);
 // draw data
 glDrawArrays(GL_TRIANGLES, 0, sphere5NumVerts);
 */
-
+#ifndef SPHERE5
+#define SPHERE5
 unsigned int sphere5NumVerts = 2280;
 
 float sphere5Verts [] = {
@@ -9151,3 +9152,4 @@ float sphere5TexCoords [] = {
   0.500000, 0,
 };
 
+#endif

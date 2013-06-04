@@ -7,7 +7,7 @@
 //
 
 #import "VIDGlkViewController.h"
-#import "sphere5.h"
+//#import "sphere5.h"
 #import "GLProgram.h"
 #import "VIDVideoPlayerViewController.h"
 #import <CoreMotion/CoreMotion.h>
@@ -17,6 +17,7 @@
 #define MIN_OVERTURE 25.0
 #define DEFAULT_OVERTURE 85.0
 
+#define ES_PI  (3.14159265f)
 
 #define ROLL_CORRECTION 1.43
 
@@ -48,12 +49,15 @@ GLint uniforms[NUM_UNIFORMS];
     
     GLuint _vertexArrayID;
     GLuint _vertexBufferID;
+    GLuint _vertexIndicesBufferID;
     GLuint _vertexTexCoordID;
     GLuint _vertexTexCoordAttributeIndex;
     
     float _fingerRotationX;
     float _fingerRotationY;
     CGFloat _overture;
+    
+    int _numIndices;
     
     CMMotionManager *motionManager;
     
@@ -138,6 +142,89 @@ GLint uniforms[NUM_UNIFORMS];
 }
 
 
+#pragma mark generate sphere
+int esGenSphere ( int numSlices, float radius, float **vertices, float **normals,
+                            float **texCoords, uint16_t **indices, int *numVertices_out)
+{
+    int i;
+    int j;
+    int numParallels = numSlices / 2;
+    int numVertices = ( numParallels + 1 ) * ( numSlices + 1 );
+    int numIndices = numParallels * numSlices * 6;
+    float angleStep = (2.0f * ES_PI) / ((float) numSlices);
+    
+    // Allocate memory for buffers
+    if ( vertices != NULL )
+        *vertices = malloc ( sizeof(float) * 3 * numVertices );
+    
+//    if ( normals != NULL )
+//        *normals = malloc ( sizeof(float) * 3 * numVertices );
+    
+    if ( texCoords != NULL )
+        *texCoords = malloc ( sizeof(float) * 2 * numVertices );
+    
+    if ( indices != NULL )
+        *indices = malloc ( sizeof(uint16_t) * numIndices );
+    
+    for ( i = 0; i < numParallels + 1; i++ )
+    {
+        for ( j = 0; j < numSlices + 1; j++ )
+        {
+            int vertex = ( i * (numSlices + 1) + j ) * 3;
+            
+            if ( vertices )
+            {
+                (*vertices)[vertex + 0] = radius * sinf ( angleStep * (float)i ) *
+                sinf ( angleStep * (float)j );
+                (*vertices)[vertex + 1] = radius * cosf ( angleStep * (float)i );
+                (*vertices)[vertex + 2] = radius * sinf ( angleStep * (float)i ) *
+                cosf ( angleStep * (float)j );
+            }
+            
+//            if ( normals )
+//            {
+//                (*normals)[vertex + 0] = (*vertices)[vertex + 0] / radius;
+//                (*normals)[vertex + 1] = (*vertices)[vertex + 1] / radius;
+//                (*normals)[vertex + 2] = (*vertices)[vertex + 2] / radius;
+//            }
+            
+            if ( texCoords )
+            {
+                int texIndex = ( i * (numSlices + 1) + j ) * 2;
+                (*texCoords)[texIndex + 0] = (float) j / (float) numSlices;
+                (*texCoords)[texIndex + 1] = 1.0f - ((float) i / (float) (numParallels));
+            }
+        }
+    }
+    
+    // Generate the indices
+    if ( indices != NULL )
+    {
+        uint16_t *indexBuf = (*indices);
+        for ( i = 0; i < numParallels ; i++ )
+        {
+            for ( j = 0; j < numSlices; j++ )
+            {
+                *indexBuf++  = i * ( numSlices + 1 ) + j;
+                *indexBuf++ = ( i + 1 ) * ( numSlices + 1 ) + j;
+                *indexBuf++ = ( i + 1 ) * ( numSlices + 1 ) + ( j + 1 );
+                
+                *indexBuf++ = i * ( numSlices + 1 ) + j;
+                *indexBuf++ = ( i + 1 ) * ( numSlices + 1 ) + ( j + 1 );
+                *indexBuf++ = i * ( numSlices + 1 ) + ( j + 1 );
+            }
+        }
+    }
+    
+        if(numVertices_out)
+        {
+            *numVertices_out = numVertices;
+        }
+    
+        return numIndices;
+}
+
+
 #pragma mark setup gl
 
 - (void)setupGL
@@ -146,39 +233,55 @@ GLint uniforms[NUM_UNIFORMS];
     
     [self buildProgram];
     
+    GLfloat *vVertices = NULL;
+    GLfloat *vTextCoord = NULL;
+    GLushort *indices = NULL;
+    int numVertices = 0;
+    _numIndices =  esGenSphere(200, 1.0f, &vVertices,  NULL,
+                                &vTextCoord, &indices, &numVertices);
+    
     glGenVertexArraysOES(1, &_vertexArrayID);
     glBindVertexArrayOES(_vertexArrayID);
     
+       
     // Vertex
     glGenBuffers(1, &_vertexBufferID);
     glBindBuffer(GL_ARRAY_BUFFER, _vertexBufferID);
     glBufferData(GL_ARRAY_BUFFER,
-                 sizeof(sphere5Verts),
-                 sphere5Verts,
+                 numVertices*3*sizeof(GLfloat),
+                 vVertices,
                  GL_STATIC_DRAW);
     glEnableVertexAttribArray(GLKVertexAttribPosition);
     glVertexAttribPointer(GLKVertexAttribPosition,
                           3,
                           GL_FLOAT,
                           GL_FALSE,
-                          sizeof(float) * 3,
+                          sizeof(GLfloat) * 3,
                           NULL);
     
     // Texture Coordinates
     glGenBuffers(1, &_vertexTexCoordID);
     glBindBuffer(GL_ARRAY_BUFFER, _vertexTexCoordID);
     glBufferData(GL_ARRAY_BUFFER,
-                 sizeof(sphere5TexCoords),
-                 sphere5TexCoords,
+                 numVertices*2*sizeof(GLfloat),
+                 vTextCoord,
                  GL_DYNAMIC_DRAW);
     glEnableVertexAttribArray(_vertexTexCoordAttributeIndex);
     glVertexAttribPointer(_vertexTexCoordAttributeIndex,
                           2,
                           GL_FLOAT,
                           GL_FALSE,
-                          sizeof(float) * 2,
+                          sizeof(GLfloat) * 2,
                           NULL);
     
+    //Indices
+    glGenBuffers(1, &_vertexIndicesBufferID);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _vertexIndicesBufferID);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER,
+                 sizeof(GLushort) * _numIndices,
+                 indices, GL_STATIC_DRAW);
+    
+
 	if (!_videoTextureCache) {
 		CVReturn err = CVOpenGLESTextureCacheCreate(kCFAllocatorDefault, NULL, _context, NULL, &_videoTextureCache);
 		if (err != noErr) {
@@ -235,7 +338,7 @@ GLint uniforms[NUM_UNIFORMS];
     
     _isUsingMotion = YES;
     
-
+    
 }
 
 - (void)stopDeviceMotion
@@ -260,18 +363,18 @@ GLint uniforms[NUM_UNIFORMS];
 #pragma mark - GLKView and GLKViewController delegate methods
 
 - (void)update
-{        
+{
     float aspect = fabsf(self.view.bounds.size.width / self.view.bounds.size.height);
     GLKMatrix4 projectionMatrix = GLKMatrix4MakePerspective(GLKMathDegreesToRadians(_overture),
                                                             aspect,
                                                             0.1f,
                                                             400.0f);
     GLKMatrix4 modelViewMatrix = GLKMatrix4Identity;
-    modelViewMatrix = GLKMatrix4Scale(modelViewMatrix, 300.0, 300.0, 300.0);    
+    modelViewMatrix = GLKMatrix4Scale(modelViewMatrix, 300.0, 300.0, 300.0);
     if(_isUsingMotion)
     {
         CMDeviceMotion *d = motionManager.deviceMotion;
-        if (d != nil) {            
+        if (d != nil) {
             modelViewMatrix = GLKMatrix4Rotate(modelViewMatrix, d.attitude.roll, 1.0f, 0.0f, 0.0f);
             modelViewMatrix = GLKMatrix4Rotate(modelViewMatrix,  -d.attitude.pitch, 0.0f, 1.0f, 0.0f);
             modelViewMatrix = GLKMatrix4Rotate(modelViewMatrix, -d.attitude.yaw, 0.0f, 0.0f, 1.0f);
@@ -279,10 +382,10 @@ GLint uniforms[NUM_UNIFORMS];
         }
         
     }
-
+    
     modelViewMatrix = GLKMatrix4Rotate(modelViewMatrix, _fingerRotationX, 1.0f, 0.0f, 0.0f);
     modelViewMatrix = GLKMatrix4Rotate(modelViewMatrix, _fingerRotationY, 0.0f, 1.0f, 0.0f);
-
+    
     
     
     _modelViewProjectionMatrix = GLKMatrix4Multiply(projectionMatrix, modelViewMatrix);
@@ -293,13 +396,11 @@ GLint uniforms[NUM_UNIFORMS];
 - (void)glkView:(GLKView *)view drawInRect:(CGRect)rect
 {
     
-
+    
     [_program use];
     
     glBindVertexArrayOES(_vertexArrayID);
-   
     
-        
     glUniformMatrix4fv(uniforms[UNIFORM_MODELVIEWPROJECTION_MATRIX], 1, 0, _modelViewProjectionMatrix.m);
     
     CVPixelBufferRef pixelBuffer = [self.videoPlayerController retrievePixelBufferToDraw];
@@ -366,26 +467,24 @@ GLint uniforms[NUM_UNIFORMS];
         
         CFRelease(pixelBuffer);
         
-        
         glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
         
-        glDrawArrays(GL_TRIANGLES, 0, sphere5NumVerts);
+        
+        glDrawElements ( GL_TRIANGLES, _numIndices,
+                        GL_UNSIGNED_SHORT, 0 );
     }
-    
-    
-    
     
 }
 
 #pragma mark - OpenGL Program
 - (void)buildProgram
 {
-
+    
     _program = [[GLProgram alloc]
                 initWithVertexShaderFilename:@"Shader"
                 fragmentShaderFilename:@"Shader"];
-        
+    
     [_program addAttribute:@"position"];
     [_program addAttribute:@"texCoord"];
     
@@ -445,9 +544,9 @@ GLint uniforms[NUM_UNIFORMS];
 
 
 - (void)handlePinchGesture:(UIPinchGestureRecognizer *)recognizer
-{    
+{
     _overture /= recognizer.scale;
-
+    
     if (_overture > MAX_OVERTURE)
         _overture = MAX_OVERTURE;
     if(_overture<MIN_OVERTURE)
@@ -457,7 +556,7 @@ GLint uniforms[NUM_UNIFORMS];
 
 - (void)handleSingleTapGesture:(UITapGestureRecognizer *)recognizer
 {
-    [_videoPlayerController toggleControls];	
+    [_videoPlayerController toggleControls];
 }
 
 
