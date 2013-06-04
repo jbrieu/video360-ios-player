@@ -153,10 +153,10 @@ int esGenSphere ( int numSlices, float radius, float **vertices, float **normals
     int numIndices = numParallels * numSlices * 6;
     float angleStep = (2.0f * ES_PI) / ((float) numSlices);
     
-    // Allocate memory for buffers
     if ( vertices != NULL )
         *vertices = malloc ( sizeof(float) * 3 * numVertices );
     
+// Pas besoin des normals pour l'instant
 //    if ( normals != NULL )
 //        *normals = malloc ( sizeof(float) * 3 * numVertices );
     
@@ -369,6 +369,9 @@ int esGenSphere ( int numSlices, float radius, float **vertices, float **normals
                                                             aspect,
                                                             0.1f,
                                                             400.0f);
+    projectionMatrix = GLKMatrix4Rotate(projectionMatrix, ES_PI, 1.0f, 0.0f, 0.0f);
+    
+    
     GLKMatrix4 modelViewMatrix = GLKMatrix4Identity;
     modelViewMatrix = GLKMatrix4Scale(modelViewMatrix, 300.0, 300.0, 300.0);
     if(_isUsingMotion)
@@ -386,8 +389,7 @@ int esGenSphere ( int numSlices, float radius, float **vertices, float **normals
     modelViewMatrix = GLKMatrix4Rotate(modelViewMatrix, _fingerRotationX, 1.0f, 0.0f, 0.0f);
     modelViewMatrix = GLKMatrix4Rotate(modelViewMatrix, _fingerRotationY, 0.0f, 1.0f, 0.0f);
     
-    
-    
+        
     _modelViewProjectionMatrix = GLKMatrix4Multiply(projectionMatrix, modelViewMatrix);
 }
 
@@ -469,8 +471,7 @@ int esGenSphere ( int numSlices, float radius, float **vertices, float **normals
         
         glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
-        
-        
+                
         glDrawElements ( GL_TRIANGLES, _numIndices,
                         GL_UNSIGNED_SHORT, 0 );
     }
@@ -526,7 +527,7 @@ int esGenSphere ( int numSlices, float radius, float **vertices, float **normals
     distX *= -0.005;
     distY *= -0.005;
     _fingerRotationX += distY *  _overture / 100;
-    _fingerRotationY += distX *  _overture / 100;
+    _fingerRotationY -= distX *  _overture / 100;
 }
 - (void)touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event
 {
