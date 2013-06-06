@@ -73,6 +73,10 @@ static void *AVPlayerItemStatusContext = &AVPlayerItemStatusContext;
     [self configureControleBackgroundView];
     [self configureBackButton];
     [self configureGyroButton];
+    
+#ifdef DEBUG
+    self.debugView.hidden = NO;
+#endif
 }
 
 

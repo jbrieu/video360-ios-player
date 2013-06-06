@@ -59,7 +59,8 @@ GLint uniforms[NUM_UNIFORMS];
     
     int _numIndices;
     
-    CMMotionManager *motionManager;
+    CMMotionManager *_motionManager;
+    CMAttitude *_referenceAttitude;
     
     CVOpenGLESTextureRef _lumaTexture;
     CVOpenGLESTextureRef _chromaTexture;
@@ -144,7 +145,7 @@ GLint uniforms[NUM_UNIFORMS];
 
 #pragma mark generate sphere
 int esGenSphere ( int numSlices, float radius, float **vertices, float **normals,
-                            float **texCoords, uint16_t **indices, int *numVertices_out)
+                 float **texCoords, uint16_t **indices, int *numVertices_out)
 {
     int i;
     int j;
@@ -156,9 +157,9 @@ int esGenSphere ( int numSlices, float radius, float **vertices, float **normals
     if ( vertices != NULL )
         *vertices = malloc ( sizeof(float) * 3 * numVertices );
     
-// Pas besoin des normals pour l'instant
-//    if ( normals != NULL )
-//        *normals = malloc ( sizeof(float) * 3 * numVertices );
+    // Pas besoin des normals pour l'instant
+    //    if ( normals != NULL )
+    //        *normals = malloc ( sizeof(float) * 3 * numVertices );
     
     if ( texCoords != NULL )
         *texCoords = malloc ( sizeof(float) * 2 * numVertices );
@@ -181,12 +182,12 @@ int esGenSphere ( int numSlices, float radius, float **vertices, float **normals
                 cosf ( angleStep * (float)j );
             }
             
-//            if ( normals )
-//            {
-//                (*normals)[vertex + 0] = (*vertices)[vertex + 0] / radius;
-//                (*normals)[vertex + 1] = (*vertices)[vertex + 1] / radius;
-//                (*normals)[vertex + 2] = (*vertices)[vertex + 2] / radius;
-//            }
+            //            if ( normals )
+            //            {
+            //                (*normals)[vertex + 0] = (*vertices)[vertex + 0] / radius;
+            //                (*normals)[vertex + 1] = (*vertices)[vertex + 1] / radius;
+            //                (*normals)[vertex + 2] = (*vertices)[vertex + 2] / radius;
+            //            }
             
             if ( texCoords )
             {
@@ -216,12 +217,12 @@ int esGenSphere ( int numSlices, float radius, float **vertices, float **normals
         }
     }
     
-        if(numVertices_out)
-        {
-            *numVertices_out = numVertices;
-        }
+    if(numVertices_out)
+    {
+        *numVertices_out = numVertices;
+    }
     
-        return numIndices;
+    return numIndices;
 }
 
 
@@ -238,12 +239,12 @@ int esGenSphere ( int numSlices, float radius, float **vertices, float **normals
     GLushort *indices = NULL;
     int numVertices = 0;
     _numIndices =  esGenSphere(200, 1.0f, &vVertices,  NULL,
-                                &vTextCoord, &indices, &numVertices);
+                               &vTextCoord, &indices, &numVertices);
     
     glGenVertexArraysOES(1, &_vertexArrayID);
     glBindVertexArrayOES(_vertexArrayID);
     
-       
+    
     // Vertex
     glGenBuffers(1, &_vertexBufferID);
     glBindBuffer(GL_ARRAY_BUFFER, _vertexBufferID);
@@ -281,7 +282,7 @@ int esGenSphere ( int numSlices, float radius, float **vertices, float **normals
                  sizeof(GLushort) * _numIndices,
                  indices, GL_STATIC_DRAW);
     
-
+    
 	if (!_videoTextureCache) {
 		CVReturn err = CVOpenGLESTextureCacheCreate(kCFAllocatorDefault, NULL, _context, NULL, &_videoTextureCache);
 		if (err != noErr) {
@@ -331,10 +332,16 @@ int esGenSphere ( int numSlices, float radius, float **vertices, float **normals
 #pragma mark device motion management
 - (void)startDeviceMotion
 {
-	motionManager = [[CMMotionManager alloc] init];
-	motionManager.deviceMotionUpdateInterval = 1.0 / 60.0;
-    motionManager.showsDeviceMovementDisplay = YES;
-	[motionManager startDeviceMotionUpdatesUsingReferenceFrame:CMAttitudeReferenceFrameXArbitraryCorrectedZVertical];
+	_motionManager = [[CMMotionManager alloc] init];
+    _motionManager.deviceMotionUpdateInterval = 1.0 / 60.0;
+    _motionManager.showsDeviceMovementDisplay = YES;
+    
+    [_motionManager startDeviceMotionUpdatesUsingReferenceFrame:CMAttitudeReferenceFrameXArbitraryCorrectedZVertical];
+    
+    CMDeviceMotion *deviceMotion = _motionManager.deviceMotion;
+    _referenceAttitude = deviceMotion.attitude;
+    
+    
     
     _isUsingMotion = YES;
     
@@ -346,7 +353,7 @@ int esGenSphere ( int numSlices, float radius, float **vertices, float **normals
     
     if(_isUsingMotion)
     {
-        CMDeviceMotion *d = motionManager.deviceMotion;
+        CMDeviceMotion *d = _motionManager.deviceMotion;
         if (d != nil) {
             _fingerRotationX = _fingerRotationX + d.attitude.roll + ROLL_CORRECTION;
             _fingerRotationY = _fingerRotationY -d.attitude.pitch;
@@ -354,13 +361,47 @@ int esGenSphere ( int numSlices, float radius, float **vertices, float **normals
     }
     
     _isUsingMotion = NO;
-	[motionManager stopDeviceMotionUpdates];
-	motionManager = nil;
+	[_motionManager stopDeviceMotionUpdates];
+	_motionManager = nil;
     
 }
 
+- (NSString *) orientationString: (UIDeviceOrientation) orientation
+{
+	switch (orientation)
+	{
+		case UIDeviceOrientationUnknown: return @"Unknown";
+		case UIDeviceOrientationPortrait: return @"Portrait";
+		case UIDeviceOrientationPortraitUpsideDown: return @"Portrait Upside Down";
+		case UIDeviceOrientationLandscapeLeft: return @"Landscape Left";
+		case UIDeviceOrientationLandscapeRight: return @"Landscape Right";
+		case UIDeviceOrientationFaceUp: return @"Face Up";
+		case UIDeviceOrientationFaceDown: return @"Face Down";
+		default: break;
+	}
+	return nil;
+}
 
 #pragma mark - GLKView and GLKViewController delegate methods
+
+- (void)fillDebugValues:(CMAttitude *)attitude
+{
+    self.videoPlayerController.rollValueLabel.text = [NSString stringWithFormat:@"%1.3f", attitude.roll];
+    self.videoPlayerController.yawValueLabel.text = [NSString stringWithFormat:@"%1.3f", attitude.yaw];
+    self.videoPlayerController.pitchValueLabel.text = [NSString stringWithFormat:@"%1.3f", attitude.pitch];
+    self.videoPlayerController.orientationValueLabel.text = [self orientationString:[[UIDevice currentDevice] orientation]];
+}
+
+- (BOOL) isLandscapeOrFlat
+{
+    UIDeviceOrientation orientation = [[UIDevice currentDevice] orientation];
+	return UIDeviceOrientationIsLandscape(orientation) || orientation==UIDeviceOrientationFaceUp || orientation==UIDeviceOrientationFaceDown;
+}
+
+- (BOOL) isPortrait
+{
+	return UIDeviceOrientationIsPortrait([[UIDevice currentDevice] orientation]);
+}
 
 - (void)update
 {
@@ -376,20 +417,36 @@ int esGenSphere ( int numSlices, float radius, float **vertices, float **normals
     modelViewMatrix = GLKMatrix4Scale(modelViewMatrix, 300.0, 300.0, 300.0);
     if(_isUsingMotion)
     {
-        CMDeviceMotion *d = motionManager.deviceMotion;
+        CMDeviceMotion *d = _motionManager.deviceMotion;
         if (d != nil) {
-            modelViewMatrix = GLKMatrix4Rotate(modelViewMatrix, d.attitude.roll, 1.0f, 0.0f, 0.0f);
-            modelViewMatrix = GLKMatrix4Rotate(modelViewMatrix,  -d.attitude.pitch, 0.0f, 1.0f, 0.0f);
-            modelViewMatrix = GLKMatrix4Rotate(modelViewMatrix, -d.attitude.yaw, 0.0f, 0.0f, 1.0f);
-            modelViewMatrix = GLKMatrix4Rotate(modelViewMatrix, ROLL_CORRECTION, 1.0f, 0.0f, 0.0f);
+            CMAttitude *attitude = d.attitude;
+            
+            if (_referenceAttitude != nil) [attitude multiplyByInverseOfAttitude:_referenceAttitude];
+            
+            [self fillDebugValues:attitude];
+            
+            float cRoll = -fabs(attitude.roll); // Up/Down en landscape
+            float cYaw = attitude.yaw;  // Left/ Right en landscape -> pas besoin de prendre l'opposé
+            float cPitch = attitude.pitch; // Depth en landscape -> pas besoin de prendre l'opposé
+            
+            if([self isLandscapeOrFlat])
+            {
+                modelViewMatrix = GLKMatrix4RotateX(modelViewMatrix, cRoll); // Up/Down axis
+                modelViewMatrix = GLKMatrix4RotateY(modelViewMatrix, cPitch);
+                modelViewMatrix = GLKMatrix4RotateZ(modelViewMatrix, cYaw);
+                
+                modelViewMatrix = GLKMatrix4RotateX(modelViewMatrix, ROLL_CORRECTION);
+            }
+#warning  FIXME Mode portrait manquant et touché pendant le gyro
         }
         
+    }else
+    {
+        modelViewMatrix = GLKMatrix4RotateX(modelViewMatrix, _fingerRotationX);
+        modelViewMatrix = GLKMatrix4RotateY(modelViewMatrix, _fingerRotationY);
     }
     
-    modelViewMatrix = GLKMatrix4Rotate(modelViewMatrix, _fingerRotationX, 1.0f, 0.0f, 0.0f);
-    modelViewMatrix = GLKMatrix4Rotate(modelViewMatrix, _fingerRotationY, 0.0f, 1.0f, 0.0f);
     
-        
     _modelViewProjectionMatrix = GLKMatrix4Multiply(projectionMatrix, modelViewMatrix);
 }
 
@@ -471,7 +528,7 @@ int esGenSphere ( int numSlices, float radius, float **vertices, float **normals
         
         glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
-                
+        
         glDrawElements ( GL_TRIANGLES, _numIndices,
                         GL_UNSIGNED_SHORT, 0 );
     }

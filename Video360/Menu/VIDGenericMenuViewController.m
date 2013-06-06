@@ -51,6 +51,12 @@
 }
 
 
+- (NSUInteger)supportedInterfaceOrientations
+{
+    return UIInterfaceOrientationMaskLandscape;
+}
+
+
 #pragma mark  background management
 -(void) updateBackground
 {
