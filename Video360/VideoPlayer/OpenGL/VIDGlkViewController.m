@@ -19,7 +19,7 @@
 
 #define ES_PI  (3.14159265f)
 
-#define ROLL_CORRECTION 1.43
+#define ROLL_CORRECTION ES_PI/2.0
 
 // Color Conversion Constants (YUV to RGB) including adjustment from 16-235/16-240 (video range)
 
@@ -55,6 +55,8 @@ GLint uniforms[NUM_UNIFORMS];
     
     float _fingerRotationX;
     float _fingerRotationY;
+    float _savedGyroRotationX;
+    float _savedGyroRotationY;
     CGFloat _overture;
     
     int _numIndices;
@@ -332,37 +334,39 @@ int esGenSphere ( int numSlices, float radius, float **vertices, float **normals
 #pragma mark device motion management
 - (void)startDeviceMotion
 {
+    _isUsingMotion = NO;
+    
+    
 	_motionManager = [[CMMotionManager alloc] init];
+    _referenceAttitude = nil;
     _motionManager.deviceMotionUpdateInterval = 1.0 / 60.0;
+    _motionManager.gyroUpdateInterval = 1.0f / 60;
     _motionManager.showsDeviceMovementDisplay = YES;
     
     [_motionManager startDeviceMotionUpdatesUsingReferenceFrame:CMAttitudeReferenceFrameXArbitraryCorrectedZVertical];
     
-    CMDeviceMotion *deviceMotion = _motionManager.deviceMotion;
-    _referenceAttitude = deviceMotion.attitude;
+    _referenceAttitude = _motionManager.deviceMotion.attitude;
     
-    
+    _savedGyroRotationX = 0;
+    _savedGyroRotationY = 0;
     
     _isUsingMotion = YES;
     
     
 }
 
+
+
 - (void)stopDeviceMotion
 {
-    
-    if(_isUsingMotion)
-    {
-        CMDeviceMotion *d = _motionManager.deviceMotion;
-        if (d != nil) {
-            _fingerRotationX = _fingerRotationX + d.attitude.roll + ROLL_CORRECTION;
-            _fingerRotationY = _fingerRotationY -d.attitude.pitch;
-        }
-    }
+    _fingerRotationX = _savedGyroRotationX;
+    _fingerRotationY = _savedGyroRotationY;
     
     _isUsingMotion = NO;
 	[_motionManager stopDeviceMotionUpdates];
 	_motionManager = nil;
+    
+    
     
 }
 
@@ -386,9 +390,9 @@ int esGenSphere ( int numSlices, float radius, float **vertices, float **normals
 
 - (void)fillDebugValues:(CMAttitude *)attitude
 {
-    self.videoPlayerController.rollValueLabel.text = [NSString stringWithFormat:@"%1.3f", attitude.roll];
-    self.videoPlayerController.yawValueLabel.text = [NSString stringWithFormat:@"%1.3f", attitude.yaw];
-    self.videoPlayerController.pitchValueLabel.text = [NSString stringWithFormat:@"%1.3f", attitude.pitch];
+    self.videoPlayerController.rollValueLabel.text = [NSString stringWithFormat:@"%1.0f°", GLKMathRadiansToDegrees(attitude.roll)];
+    self.videoPlayerController.yawValueLabel.text = [NSString stringWithFormat:@"%1.0f°", GLKMathRadiansToDegrees(attitude.yaw)];
+    self.videoPlayerController.pitchValueLabel.text = [NSString stringWithFormat:@"%1.0f°", GLKMathRadiansToDegrees(attitude.pitch)];
     self.videoPlayerController.orientationValueLabel.text = [self orientationString:[[UIDevice currentDevice] orientation]];
 }
 
@@ -421,13 +425,20 @@ int esGenSphere ( int numSlices, float radius, float **vertices, float **normals
         if (d != nil) {
             CMAttitude *attitude = d.attitude;
             
-            if (_referenceAttitude != nil) [attitude multiplyByInverseOfAttitude:_referenceAttitude];
-            
+            if (_referenceAttitude != nil)
+            {
+                [attitude multiplyByInverseOfAttitude:_referenceAttitude];
+            }
+#ifdef DEBUG
             [self fillDebugValues:attitude];
+#endif
+            
+            
             
             float cRoll = -fabs(attitude.roll); // Up/Down en landscape
             float cYaw = attitude.yaw;  // Left/ Right en landscape -> pas besoin de prendre l'opposé
             float cPitch = attitude.pitch; // Depth en landscape -> pas besoin de prendre l'opposé
+            
             
             if([self isLandscapeOrFlat])
             {
@@ -436,8 +447,44 @@ int esGenSphere ( int numSlices, float radius, float **vertices, float **normals
                 modelViewMatrix = GLKMatrix4RotateZ(modelViewMatrix, cYaw);
                 
                 modelViewMatrix = GLKMatrix4RotateX(modelViewMatrix, ROLL_CORRECTION);
+                
+                modelViewMatrix = GLKMatrix4RotateX(modelViewMatrix, _fingerRotationX);
+                modelViewMatrix = GLKMatrix4RotateY(modelViewMatrix, _fingerRotationY);
+                
+                _savedGyroRotationX = cRoll + ROLL_CORRECTION + _fingerRotationX;
+                _savedGyroRotationY = cPitch + _fingerRotationY;
+            }else{
+                float deviceOrientationRadians = 0.0f;
+                int mul = 1;
+                UIDeviceOrientation orientation = [[UIDevice currentDevice] orientation];
+                if (orientation == UIDeviceOrientationPortrait) {
+                    deviceOrientationRadians = -M_PI_2;
+                    mul = -1;
+                }
+                if (orientation == UIDeviceOrientationPortraitUpsideDown) {
+                    deviceOrientationRadians = M_PI_2;
+                    mul = -1;
+
+                }
+                
+                GLKMatrix4 baseRotation = GLKMatrix4MakeRotation(deviceOrientationRadians, 1.0f, 0.0f, 0.0f);//up down
+//                baseRotation = GLKMatrix4RotateY(baseRotation, M_PI);
+                
+                CMRotationMatrix a = attitude.rotationMatrix; // COL 1 : Gauche droite, COL 2: haut bas
+                GLKMatrix4 deviceMatrix = GLKMatrix4Make(mul*a.m11, mul*a.m12, a.m13, 0.0f,
+                                                        mul*a.m21, mul*a.m22, a.m23, 0.0f,
+                                                        mul*a.m31, mul*a.m32, a.m33, 0.0f,
+                                                         0.0f, 0.0f, 0.0f, 1.0f);
+                deviceMatrix = GLKMatrix4Multiply(baseRotation, deviceMatrix);
+
+                modelViewMatrix = GLKMatrix4RotateX(modelViewMatrix, _fingerRotationX);
+                modelViewMatrix = GLKMatrix4RotateY(modelViewMatrix, _fingerRotationY);
+                
+
+                
+                modelViewMatrix = GLKMatrix4Multiply(modelViewMatrix, deviceMatrix);
+                
             }
-#warning  FIXME Mode portrait manquant et touché pendant le gyro
         }
         
     }else
