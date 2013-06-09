@@ -95,6 +95,9 @@ GLint uniforms[NUM_UNIFORMS];
     view.context = self.context;
     view.drawableDepthFormat = GLKViewDrawableDepthFormat24;
     
+    [[UIDevice currentDevice] beginGeneratingDeviceOrientationNotifications];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(detectOrientation) name:UIDeviceOrientationDidChangeNotification object:nil];
+    
     UIPinchGestureRecognizer *pinchRecognizer = [[UIPinchGestureRecognizer alloc] initWithTarget:self action:@selector(handlePinchGesture:)];
     [view addGestureRecognizer:pinchRecognizer];
     
@@ -113,6 +116,15 @@ GLint uniforms[NUM_UNIFORMS];
     [self setupGL];
     
     
+}
+
+-(NSUInteger)supportedInterfaceOrientations
+{
+    return UIInterfaceOrientationMaskLandscape;
+}
+
+-(void) detectOrientation {
+//    _referenceAttitude = nil;
 }
 
 - (void)dealloc
@@ -345,7 +357,7 @@ int esGenSphere ( int numSlices, float radius, float **vertices, float **normals
     
     [_motionManager startDeviceMotionUpdatesUsingReferenceFrame:CMAttitudeReferenceFrameXArbitraryCorrectedZVertical];
     
-    _referenceAttitude = _motionManager.deviceMotion.attitude;
+    _referenceAttitude = _motionManager.deviceMotion.attitude; // Maybe nil actually. reset it later when we have data
     
     _savedGyroRotationX = 0;
     _savedGyroRotationY = 0;
@@ -370,6 +382,8 @@ int esGenSphere ( int numSlices, float radius, float **vertices, float **normals
     
 }
 
+#pragma mark - GLKView and GLKViewController delegate methods
+#ifdef SHOW_DEBUG_LABEL
 - (NSString *) orientationString: (UIDeviceOrientation) orientation
 {
 	switch (orientation)
@@ -386,7 +400,6 @@ int esGenSphere ( int numSlices, float radius, float **vertices, float **normals
 	return nil;
 }
 
-#pragma mark - GLKView and GLKViewController delegate methods
 
 - (void)fillDebugValues:(CMAttitude *)attitude
 {
@@ -395,6 +408,7 @@ int esGenSphere ( int numSlices, float radius, float **vertices, float **normals
     self.videoPlayerController.pitchValueLabel.text = [NSString stringWithFormat:@"%1.0f°", GLKMathRadiansToDegrees(attitude.pitch)];
     self.videoPlayerController.orientationValueLabel.text = [self orientationString:[[UIDevice currentDevice] orientation]];
 }
+#endif
 
 - (BOOL) isLandscapeOrFlat
 {
@@ -406,6 +420,7 @@ int esGenSphere ( int numSlices, float radius, float **vertices, float **normals
 {
 	return UIDeviceOrientationIsPortrait([[UIDevice currentDevice] orientation]);
 }
+
 
 - (void)update
 {
@@ -428,8 +443,12 @@ int esGenSphere ( int numSlices, float radius, float **vertices, float **normals
             if (_referenceAttitude != nil)
             {
                 [attitude multiplyByInverseOfAttitude:_referenceAttitude];
+            }else{
+                
+                //NSLog(@"was nil : set new attitude", nil);
+                _referenceAttitude = d.attitude;
             }
-#ifdef DEBUG
+#ifdef SHOW_DEBUG_LABEL
             [self fillDebugValues:attitude];
 #endif
             
@@ -440,7 +459,7 @@ int esGenSphere ( int numSlices, float radius, float **vertices, float **normals
             float cPitch = attitude.pitch; // Depth en landscape -> pas besoin de prendre l'opposé
             
             
-            if([self isLandscapeOrFlat])
+            if(YES)
             {
                 modelViewMatrix = GLKMatrix4RotateX(modelViewMatrix, cRoll); // Up/Down axis
                 modelViewMatrix = GLKMatrix4RotateY(modelViewMatrix, cPitch);
@@ -463,12 +482,12 @@ int esGenSphere ( int numSlices, float radius, float **vertices, float **normals
                 }
                 if (orientation == UIDeviceOrientationPortraitUpsideDown) {
                     deviceOrientationRadians = M_PI_2;
-                    mul = -1;
+                    mul = 1;
 
                 }
+                                
                 
                 GLKMatrix4 baseRotation = GLKMatrix4MakeRotation(deviceOrientationRadians, 1.0f, 0.0f, 0.0f);//up down
-//                baseRotation = GLKMatrix4RotateY(baseRotation, M_PI);
                 
                 CMRotationMatrix a = attitude.rotationMatrix; // COL 1 : Gauche droite, COL 2: haut bas
                 GLKMatrix4 deviceMatrix = GLKMatrix4Make(mul*a.m11, mul*a.m12, a.m13, 0.0f,
