@@ -80,7 +80,6 @@ static void *AVPlayerItemStatusContext = &AVPlayerItemStatusContext;
 }
 
 
-
 - (void)didReceiveMemoryWarning
 {
     [super didReceiveMemoryWarning];
@@ -92,8 +91,30 @@ static void *AVPlayerItemStatusContext = &AVPlayerItemStatusContext;
     [self setPlayButton:nil];
     [self setProgressSlider:nil];
     [self setBackButton:nil];
+
     [super viewDidUnload];
 }
+
+-(void)viewWillDisappear:(BOOL)animated
+{
+    [super viewWillDisappear:animated];
+    
+    @try{
+        [self removePlayerTimeObserver];
+        [_playerItem removeObserver:self forKeyPath:kStatusKey];
+        [_playerItem removeOutput:_videoOutput];
+        [_player removeObserver:self forKeyPath:kCurrentItemKey];
+        [_player removeObserver:self forKeyPath:kRateKey];
+    }@catch(id anException){
+        //do nothing
+    }
+        
+    _videoOutput = nil;
+    _playerItem = nil;
+    _player = nil;
+}
+
+
 
 #pragma mark video communication
 
@@ -682,13 +703,6 @@ static void *AVPlayerItemStatusContext = &AVPlayerItemStatusContext;
 #pragma mark back button
 - (IBAction)backButtonTouched:(id)sender {
     [self removePlayerTimeObserver];
-    
-    @try{
-        [_player removeObserver:self forKeyPath:@"rate"];
-    }@catch(id anException){
-        //do nothing
-    }
-    
     
     [_player pause];
     
