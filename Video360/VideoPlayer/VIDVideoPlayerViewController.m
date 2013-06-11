@@ -691,6 +691,7 @@ static void *AVPlayerItemStatusContext = &AVPlayerItemStatusContext;
     [_player pause];
     
     [_glkViewController removeFromParentViewController];
+    _glkViewController = nil;
     
     [self dismissViewControllerAnimated:YES completion:nil];
 }
