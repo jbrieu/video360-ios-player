@@ -73,6 +73,8 @@
 		018DC6481754D02700277E91 /* menu02_A_ipad@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 018DC6451754D02700277E91 /* menu02_A_ipad@2x.png */; };
 		018DC6491754D02700277E91 /* menu02_B_ipad@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 018DC6461754D02700277E91 /* menu02_B_ipad@2x.png */; };
 		018DC64A1754D02700277E91 /* menu02_C_ipad@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 018DC6471754D02700277E91 /* menu02_C_ipad@2x.png */; };
+		018EF7481767A6E100E9685A /* Demo-mp4-H264-6Mbs.mp4 in Resources */ = {isa = PBXBuildFile; fileRef = 018EF7471767A6E100E9685A /* Demo-mp4-H264-6Mbs.mp4 */; };
+		018EF74A1767AA3F00E9685A /* Demo-mp4-H264-8Mbs.mp4 in Resources */ = {isa = PBXBuildFile; fileRef = 018EF7491767AA3F00E9685A /* Demo-mp4-H264-8Mbs.mp4 */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -163,6 +165,8 @@
 		018DC6451754D02700277E91 /* menu02_A_ipad@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "menu02_A_ipad@2x.png"; sourceTree = "<group>"; };
 		018DC6461754D02700277E91 /* menu02_B_ipad@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "menu02_B_ipad@2x.png"; sourceTree = "<group>"; };
 		018DC6471754D02700277E91 /* menu02_C_ipad@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "menu02_C_ipad@2x.png"; sourceTree = "<group>"; };
+		018EF7471767A6E100E9685A /* Demo-mp4-H264-6Mbs.mp4 */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Demo-mp4-H264-6Mbs.mp4"; sourceTree = "<group>"; };
+		018EF7491767AA3F00E9685A /* Demo-mp4-H264-8Mbs.mp4 */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Demo-mp4-H264-8Mbs.mp4"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -214,6 +218,8 @@
 				010922E217555B23002B4E43 /* demo2.mp4 */,
 				010922E817555E41002B4E43 /* demo3.mp4 */,
 				010922E617555D0E002B4E43 /* demo4.mp4 */,
+				018EF7471767A6E100E9685A /* Demo-mp4-H264-6Mbs.mp4 */,
+				018EF7491767AA3F00E9685A /* Demo-mp4-H264-8Mbs.mp4 */,
 			);
 			path = EmbeddedVideos;
 			sourceTree = "<group>";
@@ -530,6 +536,8 @@
 				018C6833175B7DEA00F2F6FF /* ipadmove_unselected@2x.png in Resources */,
 				018C6836175B853100F2F6FF /* thumb.png in Resources */,
 				018C6837175B853100F2F6FF /* thumb@2x.png in Resources */,
+				018EF7481767A6E100E9685A /* Demo-mp4-H264-6Mbs.mp4 in Resources */,
+				018EF74A1767AA3F00E9685A /* Demo-mp4-H264-8Mbs.mp4 in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

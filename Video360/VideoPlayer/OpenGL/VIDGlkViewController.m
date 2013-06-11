@@ -383,7 +383,7 @@ int esGenSphere ( int numSlices, float radius, float **vertices, float **normals
 }
 
 #pragma mark - GLKView and GLKViewController delegate methods
-#ifdef SHOW_DEBUG_LABEL
+#if SHOW_DEBUG_LABEL
 - (NSString *) orientationString: (UIDeviceOrientation) orientation
 {
 	switch (orientation)
@@ -448,7 +448,7 @@ int esGenSphere ( int numSlices, float radius, float **vertices, float **normals
                 //NSLog(@"was nil : set new attitude", nil);
                 _referenceAttitude = d.attitude;
             }
-#ifdef SHOW_DEBUG_LABEL
+#if SHOW_DEBUG_LABEL
             [self fillDebugValues:attitude];
 #endif
             

@@ -74,7 +74,7 @@ static void *AVPlayerItemStatusContext = &AVPlayerItemStatusContext;
     [self configureBackButton];
     [self configureGyroButton];
     
-#ifdef DEBUG
+#if SHOW_DEBUG_LABEL
     self.debugView.hidden = NO;
 #endif
 }
@@ -91,7 +91,7 @@ static void *AVPlayerItemStatusContext = &AVPlayerItemStatusContext;
     [self setPlayButton:nil];
     [self setProgressSlider:nil];
     [self setBackButton:nil];
-
+    
     [super viewDidUnload];
 }
 
@@ -108,7 +108,7 @@ static void *AVPlayerItemStatusContext = &AVPlayerItemStatusContext;
     }@catch(id anException){
         //do nothing
     }
-        
+    
     _videoOutput = nil;
     _playerItem = nil;
     _player = nil;
@@ -150,6 +150,7 @@ static void *AVPlayerItemStatusContext = &AVPlayerItemStatusContext;
     
     AVURLAsset *asset = [AVURLAsset URLAssetWithURL:url options:nil];
     
+    
     if(![[NSFileManager defaultManager] fileExistsAtPath:[[asset URL] path]]) {
         NSLog(@"file does not exist");
     }
@@ -158,84 +159,67 @@ static void *AVPlayerItemStatusContext = &AVPlayerItemStatusContext;
     
     [asset loadValuesAsynchronouslyForKeys:requestedKeys completionHandler:^{
         
-        /* Make sure that the value of each key has loaded successfully. */
-        for (NSString *thisKey in requestedKeys)
-        {
-            NSError *error = nil;
-            AVKeyValueStatus keyStatus = [asset statusOfValueForKey:thisKey error:&error];
-            if (keyStatus == AVKeyValueStatusFailed)
-            {
-                [self assetFailedToPrepareForPlayback:error];
-                return;
-            }
-            /* If you are also implementing -[AVAsset cancelLoading], add your code here to bail out properly in the case of cancellation. */
-        }
-        
-        /* Use the AVAsset playable property to detect whether the asset can be played. */
-        if (!asset.playable)
-        {
-            /* Generate an error describing the failure. */
-            NSString *localizedDescription = NSLocalizedString(@"Item cannot be played", @"Item cannot be played description");
-            NSString *localizedFailureReason = NSLocalizedString(@"The assets tracks were loaded, but could not be made playable.", @"Item cannot be played failure reason");
-            NSDictionary *errorDict = [NSDictionary dictionaryWithObjectsAndKeys:
-                                       localizedDescription, NSLocalizedDescriptionKey,
-                                       localizedFailureReason, NSLocalizedFailureReasonErrorKey,
-                                       nil];
-            NSError *assetCannotBePlayedError = [NSError errorWithDomain:@"StitchedStreamPlayer" code:0 userInfo:errorDict];
-            
-            dispatch_async(dispatch_get_main_queue(), ^{
-                [self assetFailedToPrepareForPlayback:assetCannotBePlayedError];
-            });
-            
-            return;
-        }
-        
-        NSError* error = nil;
-        AVKeyValueStatus status = [asset statusOfValueForKey:kTracksKey error:&error];
-        if (status == AVKeyValueStatusLoaded)
-        {
-            _playerItem = [AVPlayerItem playerItemWithAsset:asset];
-            
-            dispatch_async(dispatch_get_main_queue(), ^{
-                [_playerItem addOutput:_videoOutput];
-                [_player replaceCurrentItemWithPlayerItem:_playerItem];
-                [_videoOutput requestNotificationOfMediaDataChangeWithAdvanceInterval:ONE_FRAME_DURATION];
-                
-                /* When the player item has played to its end time we'll toggle
-                 the movie controller Pause button to be the Play button */
-                [[NSNotificationCenter defaultCenter] addObserver:self
-                                                         selector:@selector(playerItemDidReachEnd:)
-                                                             name:AVPlayerItemDidPlayToEndTimeNotification
-                                                           object:_playerItem];
-                
-                seekToZeroBeforePlay = NO;
-                
-                [_playerItem addObserver:self
-                              forKeyPath:kStatusKey
-                                 options:NSKeyValueObservingOptionInitial | NSKeyValueObservingOptionNew
-                                 context:AVPlayerDemoPlaybackViewControllerStatusObservationContext];
-                
-                [_player addObserver:self
-                          forKeyPath:kCurrentItemKey
-                             options:NSKeyValueObservingOptionInitial | NSKeyValueObservingOptionNew
-                             context:AVPlayerDemoPlaybackViewControllerCurrentItemObservationContext];
-                
-                [_player addObserver:self
-                          forKeyPath:kRateKey
-                             options:NSKeyValueObservingOptionInitial | NSKeyValueObservingOptionNew
-                             context:AVPlayerDemoPlaybackViewControllerRateObservationContext];
-                
-                
-                [self initScrubberTimer];
-                
-                [self syncScrubber];
-                
-            });
-        }
-        else
-        {
-            NSLog(@"%@ Failed to load the tracks.", self);
-        }
+        dispatch_async( dispatch_get_main_queue(),
+                       ^{
+                           /* Make sure that the value of each key has loaded successfully. */
+                           for (NSString *thisKey in requestedKeys)
+                           {
+                               NSError *error = nil;
+                               AVKeyValueStatus keyStatus = [asset statusOfValueForKey:thisKey error:&error];
+                               if (keyStatus == AVKeyValueStatusFailed)
+                               {
+                                   [self assetFailedToPrepareForPlayback:error];
+                                   return;
+                               }
+                           }
+                           
+                           NSError* error = nil;
+                           AVKeyValueStatus status = [asset statusOfValueForKey:kTracksKey error:&error];
+                           if (status == AVKeyValueStatusLoaded)
+                           {
+                               _playerItem = [AVPlayerItem playerItemWithAsset:asset];
+                               
+                               
+                               [_playerItem addOutput:_videoOutput];
+                               [_player replaceCurrentItemWithPlayerItem:_playerItem];
+                               [_videoOutput requestNotificationOfMediaDataChangeWithAdvanceInterval:ONE_FRAME_DURATION];
+                               
+                               /* When the player item has played to its end time we'll toggle
+                                the movie controller Pause button to be the Play button */
+                               [[NSNotificationCenter defaultCenter] addObserver:self
+                                                                        selector:@selector(playerItemDidReachEnd:)
+                                                                            name:AVPlayerItemDidPlayToEndTimeNotification
+                                                                          object:_playerItem];
+                               
+                               seekToZeroBeforePlay = NO;
+                               
+                               [_playerItem addObserver:self
+                                             forKeyPath:kStatusKey
+                                                options:NSKeyValueObservingOptionInitial | NSKeyValueObservingOptionNew
+                                                context:AVPlayerDemoPlaybackViewControllerStatusObservationContext];
+                               
+                               [_player addObserver:self
+                                         forKeyPath:kCurrentItemKey
+                                            options:NSKeyValueObservingOptionInitial | NSKeyValueObservingOptionNew
+                                            context:AVPlayerDemoPlaybackViewControllerCurrentItemObservationContext];
+                               
+                               [_player addObserver:self
+                                         forKeyPath:kRateKey
+                                            options:NSKeyValueObservingOptionInitial | NSKeyValueObservingOptionNew
+                                            context:AVPlayerDemoPlaybackViewControllerRateObservationContext];
+                               
+                               
+                               [self initScrubberTimer];
+                               
+                               [self syncScrubber];
+                               
+                               
+                           }
+                           else
+                           {
+                               NSLog(@"%@ Failed to load the tracks.", self);
+                           }
+                       });
     }];
 }
 
@@ -259,7 +243,7 @@ static void *AVPlayerItemStatusContext = &AVPlayerItemStatusContext;
 #pragma mark play button management
 -(void)configurePlayButton
 {
-
+    
     _playButton.backgroundColor = [UIColor clearColor];
     _playButton.showsTouchWhenHighlighted = YES;
     
@@ -320,7 +304,7 @@ static void *AVPlayerItemStatusContext = &AVPlayerItemStatusContext;
     _progressSlider.value = 0;
     
     [_progressSlider setThumbImage:[UIImage imageNamed:@"thumb.png"] forState:UIControlStateNormal];
-    [_progressSlider setThumbImage:[UIImage imageNamed:@"thumb.png"] forState:UIControlStateHighlighted];    
+    [_progressSlider setThumbImage:[UIImage imageNamed:@"thumb.png"] forState:UIControlStateHighlighted];
 }
 
 #pragma mark back and gyro button management
@@ -352,7 +336,7 @@ static void *AVPlayerItemStatusContext = &AVPlayerItemStatusContext;
 }
 -(void)configureControleBackgroundView
 {
-
+    
     _playerControlBackgroundView.layer.cornerRadius = 8;
     
 }
@@ -640,14 +624,14 @@ static void *AVPlayerItemStatusContext = &AVPlayerItemStatusContext;
     }else if (context == AVPlayerDemoPlaybackViewControllerRateObservationContext)
     {
         [self updatePlayButton];
-        // NSLog(@"AVPlayerDemoPlaybackViewControllerRateObservationContext");
+        //NSLog(@"AVPlayerDemoPlaybackViewControllerRateObservationContext");
     }
     /* AVPlayer "currentItem" property observer.
      Called when the AVPlayer replaceCurrentItemWithPlayerItem:
      replacement will/did occur. */
     else if (context == AVPlayerDemoPlaybackViewControllerCurrentItemObservationContext)
     {
-        // NSLog(@"AVPlayerDemoPlaybackViewControllerCurrentItemObservationContext");
+        //NSLog(@"AVPlayerDemoPlaybackViewControllerCurrentItemObservationContext");
     }
     else
     {
@@ -694,8 +678,8 @@ static void *AVPlayerItemStatusContext = &AVPlayerItemStatusContext;
     }else{
         [_glkViewController startDeviceMotion];
     }
-        
-    _gyroButton.selected = _glkViewController.isUsingMotion;    
+    
+    _gyroButton.selected = _glkViewController.isUsingMotion;
 }
 
 

@@ -60,8 +60,8 @@
 }
 
 - (IBAction)buttonZone6Touched:(id)sender {
-    // Parc expo qualité normale
-   [self launchVideoWithName:@"demo4"];
+    // demo 1 meilleure qualité
+   [self launchVideoWithName:@"Demo-mp4-H264-8Mbs"];
 }
 
 -(void) gotToMenu2
