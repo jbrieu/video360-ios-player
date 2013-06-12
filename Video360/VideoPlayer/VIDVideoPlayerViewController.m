@@ -62,7 +62,7 @@ static void *AVPlayerItemStatusContext = &AVPlayerItemStatusContext;
 }
 
 
--(void)viewWillAppear:(BOOL)animated
+-(void)viewDidLoad
 {
     [self setupVideoPlaybackForURL:_videoURL];
     
@@ -129,8 +129,6 @@ static void *AVPlayerItemStatusContext = &AVPlayerItemStatusContext;
 
 -(void)setupVideoPlaybackForURL:(NSURL*)url
 {
-    
-    [[AVAudioSession sharedInstance] setCategory:AVAudioSessionCategoryPlayback error:NULL];
     
 	NSDictionary *pixBuffAttributes = @{(id)kCVPixelBufferPixelFormatTypeKey: @(kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange)};
 	_videoOutput = [[AVPlayerItemVideoOutput alloc] initWithPixelBufferAttributes:pixBuffAttributes];
