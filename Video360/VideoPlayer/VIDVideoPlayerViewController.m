@@ -64,6 +64,16 @@ static void *AVPlayerItemStatusContext = &AVPlayerItemStatusContext;
 
 -(void)viewDidLoad
 {
+    
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(applicationWillResignActive:)
+                                                 name:UIApplicationWillResignActiveNotification
+                                               object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(applicationDidBecomeActive:)
+                                                 name:UIApplicationDidBecomeActiveNotification
+                                               object:nil];
+    
     [self setupVideoPlaybackForURL:_videoURL];
     
     [self configureGLKView];
@@ -80,20 +90,37 @@ static void *AVPlayerItemStatusContext = &AVPlayerItemStatusContext;
 }
 
 
+- (void)applicationWillResignActive:(NSNotification *)notification
+{
+    [self pause];    
+}
+
+- (void)applicationDidBecomeActive:(NSNotification *)notification
+{
+    [self updatePlayButton];
+    [_player seekToTime:[_player currentTime]];
+}
+
+
+
 - (void)didReceiveMemoryWarning
 {
     [super didReceiveMemoryWarning];
     // Dispose of any resources that can be recreated.
 }
 
-- (void)viewDidUnload {
+-(void)dealloc
+{
+    [[NSNotificationCenter defaultCenter] removeObserver:self name:UIApplicationWillResignActiveNotification object:nil];
+    [[NSNotificationCenter defaultCenter] removeObserver:self name:UIApplicationDidBecomeActiveNotification object:nil];
+    
     [self setPlayerControlBackgroundView:nil];
     [self setPlayButton:nil];
     [self setProgressSlider:nil];
     [self setBackButton:nil];
-    
-    [super viewDidUnload];
 }
+
+
 
 -(void)viewWillDisappear:(BOOL)animated
 {
@@ -114,7 +141,10 @@ static void *AVPlayerItemStatusContext = &AVPlayerItemStatusContext;
     _player = nil;
 }
 
-
+-(void)viewWillAppear:(BOOL)animated
+{
+    [self updatePlayButton];
+}
 
 #pragma mark video communication
 
@@ -294,6 +324,8 @@ static void *AVPlayerItemStatusContext = &AVPlayerItemStatusContext;
     
     [self scheduleHideControls];
 }
+
+
 
 #pragma mark progress slider management
 -(void) configureProgressSlider
@@ -622,7 +654,7 @@ static void *AVPlayerItemStatusContext = &AVPlayerItemStatusContext;
     }else if (context == AVPlayerDemoPlaybackViewControllerRateObservationContext)
     {
         [self updatePlayButton];
-        //NSLog(@"AVPlayerDemoPlaybackViewControllerRateObservationContext");
+       // NSLog(@"AVPlayerDemoPlaybackViewControllerRateObservationContext");
     }
     /* AVPlayer "currentItem" property observer.
      Called when the AVPlayer replaceCurrentItemWithPlayerItem:
