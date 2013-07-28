@@ -14,4 +14,4 @@
 #endif
 
 
-#define SHOW_DEBUG_LABEL 0
+#define SHOW_DEBUG_LABEL 1

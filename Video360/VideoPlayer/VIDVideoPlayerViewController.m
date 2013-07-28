@@ -101,8 +101,6 @@ static void *AVPlayerItemStatusContext = &AVPlayerItemStatusContext;
     [_player seekToTime:[_player currentTime]];
 }
 
-
-
 - (void)didReceiveMemoryWarning
 {
     [super didReceiveMemoryWarning];
