@@ -5,6 +5,9 @@
 //  Created by Jean-Baptiste Rieu on 08/05/13.
 //  Copyright (c) 2013 Video360 Developper. All rights reserved.
 //
+//
+//  Modif EC el 7-11-13, stopDeviceMotion, restores corrctly  _finderRotationX value
+//  avoids using touch when in motion mode
 
 #import "VIDGlkViewController.h"
 //#import "sphere5.h"
@@ -371,7 +374,7 @@ int esGenSphere ( int numSlices, float radius, float **vertices, float **normals
 
 - (void)stopDeviceMotion
 {
-    _fingerRotationX = _savedGyroRotationX;
+     _fingerRotationX = _savedGyroRotationX-_referenceAttitude.roll- ROLL_CORRECTION;
     _fingerRotationY = _savedGyroRotationY;
     
     _isUsingMotion = NO;
@@ -636,12 +639,14 @@ int esGenSphere ( int numSlices, float radius, float **vertices, float **normals
 #pragma mark - touches
 - (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event
 {
+    if(_isUsingMotion) return;
     for (UITouch *touch in touches) {
         [_currentTouches addObject:touch];
     }
 }
 - (void)touchesMoved:(NSSet *)touches withEvent:(UIEvent *)event
 {
+    if(_isUsingMotion) return;
     UITouch *touch = [touches anyObject];
     float distX = [touch locationInView:touch.view].x -
     [touch previousLocationInView:touch.view].x;
@@ -654,6 +659,7 @@ int esGenSphere ( int numSlices, float radius, float **vertices, float **normals
 }
 - (void)touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event
 {
+    if(_isUsingMotion) return;
     for (UITouch *touch in touches) {
         [_currentTouches removeObject:touch];
     }
