@@ -8,6 +8,8 @@
 //
 //  Modif EC el 7-11-13, stopDeviceMotion, restores corrctly  _finderRotationX value
 //  avoids using touch when in motion mode
+//  Modif EC le 27-11-13, update, takes into account if the device is right of left oriented when in landscape  for the gyro
+
 
 #import "VIDGlkViewController.h"
 //#import "sphere5.h"
@@ -461,6 +463,11 @@ int esGenSphere ( int numSlices, float radius, float **vertices, float **normals
             float cYaw = attitude.yaw;  // Left/ Right en landscape -> pas besoin de prendre l'opposé
             float cPitch = attitude.pitch; // Depth en landscape -> pas besoin de prendre l'opposé
             
+             UIDeviceOrientation orientation = [[UIDevice currentDevice] orientation];
+            if (orientation == UIDeviceOrientationLandscapeRight ){
+                  cPitch = cPitch*-1; // correct depth when in landscape right
+            }
+
             
             if(YES)
             {
